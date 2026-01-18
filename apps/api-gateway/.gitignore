@@ -1,14 +1,3 @@
-# Gemini-related files
-DEVELOPER-WORKFLOW-GUIDE.md
-*gemini*.md
-*GEMINI*.md
-/generated/prisma
-PROJECT.md
-REPORT.md
-
-.gemini/
-gha-creds-*.json
-
 # compiled output
 /dist
 /node_modules
