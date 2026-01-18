@@ -157,6 +157,20 @@ export class ProxyController {
     res.status(HttpStatus.OK).json(result);
   }
 
+  @All('ocr')
+  @UseGuards(JwtAuthGuard)
+  async proxyOcrList(@Req() req: Request, @Res() res: Response) {
+    const path = req.path;
+    const result = await this.proxyService.proxyRequest(
+      'ocr',
+      path,
+      req.method as Method,
+      req.body,
+      sanitizeHeaders(req.headers),
+    );
+    res.status(HttpStatus.OK).json(result);
+  }
+
   // Health check (public)
   @All('health')
   health(@Res() res: Response) {
