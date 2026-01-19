@@ -1,0 +1,100 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Shared models from other services (read-only)
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  role      Role     @default(PATIENT)
+  firstName String?
+  lastName  String?
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+enum Role {
+  PATIENT
+  DOCTOR
+  PHARMACIST
+  ADMIN
+}
+
+model Appointment {
+  id             String              @id @default(uuid())
+  patientId      String
+  doctorId       String
+  scheduledAt    DateTime
+  status         AppointmentStatus
+  notes          String?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  @@map("appointments")
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+model Consultation {
+  id            String       @id @default(uuid())
+  appointmentId String       @unique
+  notes         String
+  duration      Int?
+  videoUrl      String?
+  createdAt     DateTime     @default(now())
+
+  @@map("consultations")
+}
+
+// Prescription service models
+model Prescription {
+  id             String              @id @default(uuid())
+  doctorId       String
+  patientId      String
+  consultationId String?
+  ocrText        String?
+  status         PrescriptionStatus  @default(DRAFT)
+  medications    Medication[]
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  @@index([doctorId])
+  @@index([patientId])
+  @@index([consultationId])
+  @@index([status])
+  @@map("prescriptions")
+}
+
+enum PrescriptionStatus {
+  DRAFT
+  ISSUED
+  FULFILLED
+  CANCELLED
+}
+
+model Medication {
+  id             String       @id @default(uuid())
+  prescriptionId String
+  prescription   Prescription @relation(fields: [prescriptionId], references: [id], onDelete: Cascade)
+  name           String
+  dosage         String
+  quantity       Int
+  instructions   String?
+  createdAt      DateTime     @default(now())
+
+  @@index([prescriptionId])
+  @@map("medications")
+}
