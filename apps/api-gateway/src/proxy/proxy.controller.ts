@@ -5,6 +5,7 @@ import {
   Res,
   UseGuards,
   HttpStatus,
+  Post,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { ProxyService } from './proxy.service';
@@ -59,26 +60,30 @@ export class ProxyController {
   @UseGuards(JwtAuthGuard)
   async proxyAppointments(@Req() req: Request, @Res() res: Response) {
     const path = getPathParam(req.params['path']);
+    const user = (req as any).user;
     const result = await this.proxyService.proxyRequest(
       'clinic',
       path,
       req.method as Method,
       req.body,
       sanitizeHeaders(req.headers),
+      user,
     );
     res.status(HttpStatus.OK).json(result);
   }
 
-  @All('appointments')
+  @Post('appointments')
   @UseGuards(JwtAuthGuard)
   async proxyAppointmentsList(@Req() req: Request, @Res() res: Response) {
     const path = req.path;
+    const user = (req as any).user;
     const result = await this.proxyService.proxyRequest(
       'clinic',
       path,
       req.method as Method,
       req.body,
       sanitizeHeaders(req.headers),
+      user,
     );
     res.status(HttpStatus.OK).json(result);
   }
@@ -88,12 +93,14 @@ export class ProxyController {
   @UseGuards(JwtAuthGuard)
   async proxyPrescriptions(@Req() req: Request, @Res() res: Response) {
     const path = getPathParam(req.params['path']);
+    const user = (req as any).user;
     const result = await this.proxyService.proxyRequest(
       'prescription',
       path,
       req.method as Method,
       req.body,
       sanitizeHeaders(req.headers),
+      user,
     );
     res.status(HttpStatus.OK).json(result);
   }
@@ -102,12 +109,14 @@ export class ProxyController {
   @UseGuards(JwtAuthGuard)
   async proxyPrescriptionsList(@Req() req: Request, @Res() res: Response) {
     const path = req.path;
+    const user = (req as any).user;
     const result = await this.proxyService.proxyRequest(
       'prescription',
       path,
       req.method as Method,
       req.body,
       sanitizeHeaders(req.headers),
+      user,
     );
     res.status(HttpStatus.OK).json(result);
   }
@@ -170,6 +179,8 @@ export class ProxyController {
     );
     res.status(HttpStatus.OK).json(result);
   }
+
+
 
   // Health check (public)
   @All('health')

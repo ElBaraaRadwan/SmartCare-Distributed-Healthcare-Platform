@@ -19,6 +19,7 @@ export class ProxyService {
     method: Method,
     body?: Buffer | Record<string, any>,
     headers?: Record<string, string>,
+    user?: { userId: string; email: string; role: string },
   ): Promise<unknown> {
     const serviceUrl = this.getServiceUrl(serviceName);
     const url = `${serviceUrl}${path}`;
@@ -28,6 +29,7 @@ export class ProxyService {
     this.logger.log(`  Method: ${method}`);
     this.logger.log(`  Body (type: ${typeof body}, length: ${body instanceof Buffer ? body.length : 'N/A'}): ${body instanceof Buffer ? '[Buffer]' : JSON.stringify(body)}`);
     this.logger.log(`  Headers: ${JSON.stringify(headers)}`);
+    this.logger.log(`  User context: ${JSON.stringify(user)}`);
 
     try {
       const response = await firstValueFrom(
@@ -36,8 +38,15 @@ export class ProxyService {
           method,
           data: body,
           headers: {
-            ...(headers as AxiosRequestHeaders),
-            // Let Axios automatically set Content-Type and Content-Length for JSON data
+            // Don't pass through all original headers, only essential ones
+            'Content-Type': headers?.['content-type'] || 'application/json',
+            'Accept': headers?.['accept'] || '*/*',
+            // Inject user context headers for downstream services
+            ...(user && {
+              'x-user-id': user.userId,
+              'x-user-email': user.email,
+              'x-user-role': user.role,
+            }),
           },
         }),
       );
