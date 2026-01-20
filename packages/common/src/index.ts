@@ -12,6 +12,12 @@ export * from './decorators/roles.decorator';
 export * from './guards/authenticated.guard';
 export * from './guards/roles.guard';
 
+// Pipes
+export * from './pipes/validation.pipe';
+
+// Services
+export * from './services/security-logger.service';
+
 // Constants
 export * from './constants/events';
 export * from './constants/redis-channels';

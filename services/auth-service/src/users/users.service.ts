@@ -1,20 +1,38 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma, User } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import * as argon2 from 'argon2';
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   async create(data: Prisma.UserCreateInput): Promise<Omit<User, 'password'>> {
-    const hashedPassword = await bcrypt.hash(data.password, 10);
-    const { password, ...user } = await this.prisma.user.create({
+    // Use Argon2id (memory-hard, GPU-resistant)
+    const hashedPassword = await argon2.hash(data.password, {
+      type: argon2.argon2id,
+      memoryCost: 65536, // 64 MB
+      timeCost: 3,        // 3 iterations
+      parallelism: 4,     // 4 parallel threads
+    });
+
+    const user = await this.prisma.user.create({
       data: {
         ...data,
         password: hashedPassword,
       },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        firstName: true,
+        lastName: true,
+        phone: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
+
     return user;
   }
 
@@ -25,16 +43,18 @@ export class UsersService {
   }
 
   async findById(id: string): Promise<Omit<User, 'password'> | null> {
-    const userWithPassword = await this.prisma.user.findUnique({
+    return this.prisma.user.findUnique({
       where: { id },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        firstName: true,
+        lastName: true,
+        phone: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
-
-    if (!userWithPassword) {
-      return null;
-    }
-
-    // Destructure password out after ensuring user is not null
-    const { password, ...userWithoutPassword } = userWithPassword;
-    return userWithoutPassword;
   }
 }
