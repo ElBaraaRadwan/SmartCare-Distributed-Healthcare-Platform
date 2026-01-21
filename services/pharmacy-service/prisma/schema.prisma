@@ -1,0 +1,113 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Shared models (read-only from other services)
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  role      Role     @default(PATIENT)
+  firstName String?
+  lastName  String?
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+enum Role {
+  PATIENT
+  DOCTOR
+  PHARMACIST
+  ADMIN
+}
+
+model Prescription {
+  id             String              @id @default(uuid())
+  doctorId       String
+  patientId      String
+  consultationId String?
+  ocrText        String?
+  status         PrescriptionStatus
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  @@map("prescriptions")
+}
+
+enum PrescriptionStatus {
+  DRAFT
+  ISSUED
+  FULFILLED
+  CANCELLED
+}
+
+model Medication {
+  id             String       @id @default(uuid())
+  prescriptionId String
+  name           String
+  dosage         String
+  quantity       Int
+  instructions   String?
+  createdAt      DateTime     @default(now())
+
+  @@map("medications")
+}
+
+// Pharmacy service models
+model Stock {
+  id           String   @id @default(uuid())
+  drugName     String   @unique
+  quantity     Int      @default(0)
+  price        Float
+  minThreshold Int      @default(50)
+  description  String?
+  updatedAt    DateTime @updatedAt
+  createdAt    DateTime @default(now())
+
+  @@index([drugName])
+  @@map("stocks")
+}
+
+model Order {
+  id                String      @id @default(uuid())
+  prescriptionId    String      @unique
+  pharmacyId        String
+  status            OrderStatus @default(PENDING)
+  total             Float       @default(0)
+  estimatedDelivery DateTime?
+  medications       OrderItem[]
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@index([prescriptionId])
+  @@index([pharmacyId])
+  @@index([status])
+  @@map("orders")
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model OrderItem {
+  id       String @id @default(uuid())
+  orderId  String
+  order    Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  drugName String
+  quantity Int
+  price    Float
+
+  @@index([orderId])
+  @@map("order_items")
+}
