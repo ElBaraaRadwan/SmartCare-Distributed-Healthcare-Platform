@@ -4,12 +4,14 @@ import { PrismaModule } from './prisma/prisma.module';
 import { EventsModule } from './events/events.module';
 import { StockModule } from './stock/stock.module';
 import { OrdersModule } from './orders/orders.module';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    RedisModule,
     PrismaModule,
     EventsModule,
     StockModule,

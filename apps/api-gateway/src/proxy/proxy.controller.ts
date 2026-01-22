@@ -122,16 +122,33 @@ export class ProxyController {
   }
 
   // Pharmacy routes (protected)
+  @All('pharmacy/orders')
+  @UseGuards(JwtAuthGuard)
+  async proxyPharmacyOrders(@Req() req: Request, @Res() res: Response) {
+    const user = (req as any).user;
+    const result = await this.proxyService.proxyRequest(
+      'pharmacy',
+      '/orders',
+      req.method as Method,
+      req.body,
+      sanitizeHeaders(req.headers),
+      user,
+    );
+    res.status(HttpStatus.OK).json(result);
+  }
+
   @All('pharmacy/*path')
   @UseGuards(JwtAuthGuard)
   async proxyPharmacy(@Req() req: Request, @Res() res: Response) {
     const path = getPathParam(req.params['path']);
+    const user = (req as any).user;
     const result = await this.proxyService.proxyRequest(
       'pharmacy',
       path,
       req.method as Method,
       req.body,
       sanitizeHeaders(req.headers),
+      user,
     );
     res.status(HttpStatus.OK).json(result);
   }
@@ -141,12 +158,14 @@ export class ProxyController {
   @UseGuards(JwtAuthGuard)
   async proxyPayments(@Req() req: Request, @Res() res: Response) {
     const path = getPathParam(req.params['path']);
+    const user = (req as any).user;
     const result = await this.proxyService.proxyRequest(
       'payments',
       path,
       req.method as Method,
       req.body,
       sanitizeHeaders(req.headers),
+      user,
     );
     res.status(HttpStatus.OK).json(result);
   }
@@ -156,12 +175,14 @@ export class ProxyController {
   @UseGuards(JwtAuthGuard)
   async proxyOcr(@Req() req: Request, @Res() res: Response) {
     const path = getPathParam(req.params['path']);
+    const user = (req as any).user;
     const result = await this.proxyService.proxyRequest(
       'ocr',
       path,
       req.method as Method,
       req.body,
       sanitizeHeaders(req.headers),
+      user,
     );
     res.status(HttpStatus.OK).json(result);
   }
@@ -170,12 +191,14 @@ export class ProxyController {
   @UseGuards(JwtAuthGuard)
   async proxyOcrList(@Req() req: Request, @Res() res: Response) {
     const path = req.path;
+    const user = (req as any).user;
     const result = await this.proxyService.proxyRequest(
       'ocr',
       path,
       req.method as Method,
       req.body,
       sanitizeHeaders(req.headers),
+      user,
     );
     res.status(HttpStatus.OK).json(result);
   }

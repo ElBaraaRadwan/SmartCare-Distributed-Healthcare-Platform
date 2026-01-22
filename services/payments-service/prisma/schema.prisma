@@ -49,6 +49,51 @@ enum OrderStatus {
   CANCELLED
 }
 
+model Stock {
+  id            String   @id @default(uuid())
+  drugName      String   @unique
+  quantity      Int
+  price         Float
+  minThreshold  Int      @default(50)
+  description   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("stocks")
+}
+
+model Prescription {
+  id             String              @id @default(uuid())
+  doctorId       String
+  patientId      String
+  consultationId String?
+  ocrText        String?
+  status         PrescriptionStatus
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  @@map("prescriptions")
+}
+
+enum PrescriptionStatus {
+  DRAFT
+  ISSUED
+  FULFILLED
+  CANCELLED
+}
+
+model Medication {
+  id             String       @id @default(uuid())
+  prescriptionId String
+  name           String
+  dosage         String
+  quantity       Int
+  instructions   String?
+  createdAt      DateTime     @default(now())
+
+  @@map("medications")
+}
+
 // Payments service models
 model Payment {
   id              String        @id @default(uuid())

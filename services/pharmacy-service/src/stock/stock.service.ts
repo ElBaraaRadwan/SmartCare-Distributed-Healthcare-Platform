@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, ConflictException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventEmitterService } from '../events/event-emitter.service';
+import { RedisService } from '../redis/redis.service';
 import { CreateStockDto } from './dto/create-stock.dto';
 import { UpdateStockDto } from './dto/update-stock.dto';
 import { EVENT_TYPES } from '@smartcare/common';
@@ -12,6 +13,7 @@ export class StockService {
   constructor(
     private prisma: PrismaService,
     private eventEmitter: EventEmitterService,
+    private redisService: RedisService,
   ) {}
 
   async create(dto: CreateStockDto) {
@@ -34,16 +36,37 @@ export class StockService {
       },
     });
 
+    // Invalidate stock catalog cache
+    await this.redisService.del('pharmacy:stocks:all');
+    this.logger.debug('Invalidated stock catalog cache after creation');
+
     this.logger.log(`Stock created: ${stock.drugName} (Qty: ${stock.quantity})`);
     return stock;
   }
 
   async findAll() {
-    return this.prisma.stock.findMany({
-      orderBy: {
-        drugName: 'asc',
-      },
-    });
+    const cacheKey = 'pharmacy:stocks:all';
+
+    // Try to get from cache first
+    let stocks = await this.redisService.get<any[]>(cacheKey);
+
+    if (!stocks) {
+      // Cache miss - fetch from database
+      this.logger.debug('Cache miss for stock catalog - fetching from database');
+      stocks = await this.prisma.stock.findMany({
+        orderBy: {
+          drugName: 'asc',
+        },
+      });
+
+      // Cache the result for 1 hour
+      await this.redisService.set(cacheKey, stocks, 3600);
+      this.logger.debug(`Cached ${stocks.length} stock items for 1 hour`);
+    } else {
+      this.logger.debug(`Cache hit - retrieved ${stocks.length} stock items`);
+    }
+
+    return stocks;
   }
 
   async findOne(id: string) {
@@ -78,6 +101,10 @@ export class StockService {
       data: dto,
     });
 
+    // Invalidate stock catalog cache
+    await this.redisService.del('pharmacy:stocks:all');
+    this.logger.debug('Invalidated stock catalog cache after update');
+
     this.logger.log(`Stock updated: ${stock.drugName}`);
     return stock;
   }
@@ -95,6 +122,10 @@ export class StockService {
       where: { drugName },
       data: { quantity: newQuantity },
     });
+
+    // Invalidate stock catalog cache
+    await this.redisService.del('pharmacy:stocks:all');
+    this.logger.debug('Invalidated stock catalog cache after quantity adjustment');
 
     // Check for low stock
     if (updated.quantity <= updated.minThreshold) {
@@ -114,9 +145,15 @@ export class StockService {
   async delete(id: string) {
     await this.findOne(id); // Ensure exists
 
-    return this.prisma.stock.delete({
+    const deleted = await this.prisma.stock.delete({
       where: { id },
     });
+
+    // Invalidate stock catalog cache
+    await this.redisService.del('pharmacy:stocks:all');
+    this.logger.debug('Invalidated stock catalog cache after deletion');
+
+    return deleted;
   }
 
   async getLowStock() {

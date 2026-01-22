@@ -41,6 +41,7 @@ export class ProxyService {
             // Don't pass through all original headers, only essential ones
             'Content-Type': headers?.['content-type'] || 'application/json',
             'Accept': headers?.['accept'] || '*/*',
+            'Authorization': headers?.['authorization'], // Pass through auth header
             // Inject user context headers for downstream services
             ...(user && {
               'x-user-id': user.userId,

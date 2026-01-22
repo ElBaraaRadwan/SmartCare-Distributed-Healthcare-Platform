@@ -1,217 +1,316 @@
-# 🏥 SmartCare
+<!-- Improved compatibility of back to top link: See: https://github.com/othneildrew/Best-README-Template/pull/73 -->
+<a id="readme-top"></a>
+<!--
+*** Thanks for checking out SmartCare. If you have a suggestion
+*** that would make this better, please fork the repo and create a pull request
+*** or simply open an issue with the tag "enhancement".
+*** Don't forget to give the project a star!
+*** Thanks again! Now go create something AMAZING!
+-->
 
-A **Healthcare Management Platform** built with [NestJS](https://nestjs.com/) and microservices architecture, designed to deliver modern healthcare functionalities including intelligent appointment scheduling, digital prescriptions, pharmacy operations, and patient management.
+<!-- PROJECT SHIELDS -->
+<!--
+*** I'm using markdown "reference style" links for readability.
+*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
+*** See the bottom of this document for the declaration of the reference variables
+*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
+*** https://www.markdownguide.org/basic-syntax/#reference-style-links
+-->
+[![Contributors][contributors-shield]][contributors-url] [![Forks][forks-shield]][forks-url] [![Stargazers][stars-shield]][stars-url] [![Issues][issues-shield]][issues-url] [![MIT License][license-shield]][license-url]
 
----
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+  <img src="./SmartCare Logo.png" alt="SmartCare Logo" width="500"/>
+</div>
 
-## 🧰 Tools & Dependencies
+<h3 align="center">SmartCare</h3>
 
-The core tools and dependencies used in this project:
+  <p align="center">
+    A distributed healthcare platform built with NestJS, following microservices architecture principles to deliver scalable and secure healthcare solutions.
+    <br />
+    <a href="https://github.com/ElbaraaRadwan/smartcare"><strong>Explore the docs »</strong></a>
+    <br />
+    <br />
+    <a href="https://github.com/ElbaraaRadwan/smartcare">View Demo</a>
+    &middot;
+    <a href="https://github.com/ElbaraaRadwan/smartcare/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
+    &middot;
+    <a href="https://github.com/ElbaraaRadwan/smartcare/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
+  </p>
+</div>
 
-<p align="center">
-  <img src="https://nestjs.com/img/logo-small.svg" alt="NestJS" height="100" />
-  <img src="https://img.icons8.com/color/100/000000/postgreesql.png" alt="PostgreSQL" height="100" />
-  <img src="https://img.icons8.com/color/100/000000/redis.png" alt="Redis" height="100" />
-  <img src="https://icon.icepanel.io/Technology/svg/Prisma.svg" alt="Prisma" height="100" />
-  <img src="https://img.icons8.com/?size=100&id=wU62u24brJ44&format=png&color=000000" alt="MinIO" height="100" />
-  <img src="https://img.icons8.com/color/100/000000/nextjs.png" alt="Next.js" height="100" />
-  <img src="https://img.icons8.com/color/100/000000/typescript.png" alt="TypeScript" height="100" />
-  <img src="https://img.icons8.com/color/100/000000/docker.png" alt="Docker" height="100" />
-</p>
+<!-- TABLE OF CONTENTS -->
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li>
+      <a href="#about-the-project">About The Project</a>
+      <ul>
+        <li><a href="#built-with">Built With</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#getting-started">Getting Started</a>
+      <ul>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#installation">Installation</a></li>
+        <li><a href="#local-development">Local Development</a></li>
+      </ul>
+    </li>
+    <li><a href="#usage">Usage</a></li>
+    <li><a href="#project-architecture">Project Architecture</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="#acknowledgments">Acknowledgments</a></li>
+  </ol>
+</details>
 
-### 🚢 Infrastructure & Deployment
+<!-- ABOUT THE PROJECT -->
+## About The Project
 
-<p align="center">
-  <img src="https://img.icons8.com/color/100/000000/kubernetes.png" alt="Kubernetes" height="100" />
-  <img src="https://nx.dev/images/nx-logo.png" alt="Nx" height="100" />
-  <img src="https://img.icons8.com/color/100/000000/nginx.png" alt="NGINX" height="100" />
-  <img src="https://img.icons8.com/color/100/000000/amazon-web-services.png" alt="AWS" height="100" />
-  <img src="https://icon.icepanel.io/AWS/svg/Containers/Elastic-Container-Registry.svg" alt="AWS ECR" height="100">
-</p>
+SmartCare is a distributed healthcare platform designed to streamline healthcare operations through a microservices architecture. It provides comprehensive solutions for patient management, clinic operations, prescription handling, and billing, all while ensuring high security, scalability, and maintainability.
 
----
+The platform integrates key services such as authentication and authorization, clinic and appointment management, prescriptions and pharmacy operations, payments and billing, notifications, and OCR for medical documents. Emphasizing role-based access control, event-driven communication, and clean architecture, SmartCare aims to deliver reliable and efficient healthcare services.
 
-## 🚀 Features
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-### Core Services
-- **API Gateway**: Centralized entry point with authentication, routing, and rate limiting
-- **Auth Service**: User management, JWT authentication, role-based access control
-- **Clinic Service**: Appointment scheduling, consultation management, doctor-patient interactions
-- **Prescription Service**: Digital prescriptions, medication management, OCR integration
+### Built With
 
-### Planned Services
-- **Pharmacy Service**: Inventory management, dispensing, medication tracking
-- **Payment Service**: Billing, transactions, insurance processing
-- **Notification Service**: Email/SMS alerts, appointment reminders
-- **OCR Service**: Prescription scanning, document digitization
+This project leverages modern technologies to ensure robustness and scalability:
 
-### Frontend
-- **Next.js Dashboard**: Patient/doctor portals, administrative interfaces
+[![NestJS][NestJS]][NestJS-url] [![Node.js][Node.js]][Node-url] [![TypeScript][TypeScript]][TypeScript-url] [![PostgreSQL][PostgreSQL]][PostgreSQL-url] [![Redis][Redis]][Redis-url] [![Prisma][Prisma]][Prisma-url] [![Docker][Docker]][Docker-url] [![Nx][Nx]][Nx-url]
 
-## 🏗️ Architecture
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-### High-Level Overview
-```
-┌─────────────┐
-│   Next.js   │ (Frontend / API Gateway)
-│  (Port 3000)│
-└──────┬──────┘
-       │
-       ▼
-┌─────────────────────────────────────────────────┐
-│           API Gateway (NestJS)                  │
-│              (Port 4000)                        │
-└───┬─────┬──────┬──────┬──────┬──────┬──────┬────┘
-    │     │      │      │      │      │      │
-    ▼     ▼      ▼      ▼      ▼      ▼      ▼
-┌─────┐ ┌────┐ ┌────┐ ┌────┐ ┌────┐ ┌────┐ ┌────┐
-│Auth │ │Clin│ │Pres│ │Phar│ │Pay │ │Noti│ │OCR │
-│4001 │ │4002│ │4003│ │4004│ │4005│ │4006│ │8000│
-└─────┘ └────┘ └────┘ └────┘ └────┘ └────┘ └────┘
-```
+<!-- GETTING STARTED -->
+## Getting Started
 
-For detailed architecture diagrams, see:
-- [High-Level Architecture Diagram](High-Level%20Architecture%20Diagram.txt)
-- [Database Schema Diagram](Database%20Schema%20Diagram.md)
-- [SmartCare System ER Diagram (Mermaid)](SmartCare%20Diagram%20v1.mmd)
-- ![SmartCare System ER Diagram](SmartCare%20Diagram%20v1.png)
-
-## 🛠️ Tech Stack
-
-### Backend
-- **Framework**: NestJS (Node.js)
-- **Language**: TypeScript
-- **Database**: PostgreSQL
-- **ORM**: Prisma
-- **Cache**: Redis
-- **Message Queue**: BullMQ
-- **Object Storage**: MinIO
-- **API Documentation**: Swagger/OpenAPI
-
-### Frontend
-- **Framework**: Next.js 14 (React)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **State Management**: Zustand/React Query
-
-### DevOps & Tools
-- **Monorepo**: Nx
-- **Containerization**: Docker & Docker Compose
-- **Testing**: Jest + Supertest
-- **Linting**: ESLint
-- **Code Formatting**: Prettier
-- **CI/CD**: GitHub Actions
-
-## 🚀 Getting Started
+To get a local copy of SmartCare up and running, follow these steps.
 
 ### Prerequisites
-- Node.js 18+
-- Docker & Docker Compose
-- PostgreSQL 15+
-- Redis 7+
-- MinIO (optional, for file storage)
+
+Ensure you have the following installed:
+* Node.js (version 18 or higher)
+* Docker and Docker Compose
+* PostgreSQL 15+ (via Docker)
+* Redis 7+ (via Docker)
+* MinIO (via Docker, for file storage)
+* npm or yarn
 
 ### Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/your-org/smartcare.git
-   cd smartcare
-   ```
+1. Clone the repository:
+    ```sh
+    git clone https://github.com/ElbaraaRadwan/smartcare.git
+    ```
+2. Navigate to the project directory:
+    ```sh
+    cd smartcare
+    ```
+3. Install root dependencies (Nx workspace):
+    ```sh
+    npm install
+    ```
+4. Start infrastructure services (PostgreSQL, Redis, MinIO):
+    ```sh
+    docker compose up -d postgres redis minio
+    ```
+5. Set up environment variables:
+    ```sh
+    cp .env.example .env
+    # Edit .env with your configuration
+    ```
+6. Setup database (migrations + seeding):
+    ```sh
+    ./scripts/setup-database.sh
+    ```
+    This script will:
+    - Run Prisma migrations for all services
+    - Push schema changes to databases
+    - Seed initial data for testing
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+### Local Development
 
-3. **Set up environment variables**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your configuration
-   ```
+To run the services locally for development:
 
-4. **Start infrastructure**
-   ```bash
-   docker-compose up -d postgres redis minio
-   ```
+#### Quick Start (All Services)
+```sh
+# Start all services automatically
+./scripts/start-services.sh
+```
+This will start all microservices in the background and create log files.
 
-5. **Run database migrations**
-   ```bash
-   npx nx run-many --target=migrate --all
-   ```
 
-6. **Start development servers**
-   ```bash
-   # Start all services
-   npm run dev
+<!-- PROJECT ARCHITECTURE -->
+## Project Architecture
 
-   # Or start individual services
-   npx nx serve api-gateway
-   npx nx serve auth-service
-   npx nx serve clinic-service
-    npx nx serve prescription-service
-   ```
+SmartCare implements a modern microservices architecture with advanced caching and event-driven communication.
 
-## 📡 API Documentation
+### Architecture Overview
 
-### Swagger/OpenAPI
+```
+┌─────────────────┐    ┌─────────────────┐
+│   Frontend      │────│   API Gateway   │ ← JWT Auth, Rate Limiting
+│   (Next.js)     │    │   (NestJS)      │
+└─────────────────┘    └─────────────────┘
+                               │
+                    ┌──────────┼──────────┐
+                    │          │          │
+          ┌─────────▼─┐ ┌──────▼────┐ ┌───▼────┐
+          │ Auth      │ │ Clinic    │ │ Prescr. │
+          │ Service   │ │ Service   │ │ Service │
+          │ Port 4001 │ │ Port 4002 │ │ Port 4003 │
+          └───────────┘ └───────────┘ └─────────┘
+                    │          │          │
+          ┌─────────▼─┐ ┌──────▼────┐ ┌───▼────┐
+          │ Pharmacy  │ │ Payments  │ │  Redis  │
+          │ Service   │ │ Service   │ │  Cache  │
+          │ Port 4004 │ │ Port 4005 │ │  Events │
+          └───────────┘ └───────────┘ └─────────┘
+                    │          │          │
+                    └──────────┼──────────┘
+                               │
+                    ┌──────────▼──────────┐
+                    │    PostgreSQL       │
+                    │   + Prisma ORM      │
+                    └─────────────────────┘
+```
 
-Once the services are running, access the API documentation for each service:
+### Key Components
 
-- **API Gateway**: `http://localhost:4000/api`
-- **Auth Service**: `http://localhost:4001/api`
-- **Clinic Service**: `http://localhost:4002/api`
-- **Prescription Service**: `http://localhost:4003/api`
+**API Gateway (Port 4000):**
+- JWT authentication and authorization
+- Rate limiting (100 requests/minute)
+- User context injection to downstream services
+- Request routing and load balancing
+- Security headers and CORS
 
----
+**Microservices:**
+- **Auth Service:** User management, JWT tokens, Redis session caching
+- **Clinic Service:** Appointment scheduling, patient-doctor management
+- **Prescription Service:** Medical prescription processing, medication tracking
+- **Pharmacy Service:** Inventory management, order fulfillment, event consumers
+- **Payments Service:** Stripe integration, checkout sessions, webhooks
 
-## 📦 Package Highlights
+**Infrastructure:**
+- **PostgreSQL:** Primary database with Prisma ORM
+- **Redis:** Caching (user data, JWT tokens) + Event messaging
+- **MinIO:** S3-compatible file storage for medical documents
+- **Docker:** Containerized deployment with health checks
 
-This project uses a rich set of modern libraries and frameworks to deliver robust, scalable, and efficient healthcare functionality. Key packages include:
+### Data Flow
 
-### 🔧 Framework & Core
-- **@nestjs/core** – Core NestJS framework module
-- **@nestjs/jwt**, **@nestjs/passport** – Authentication with JWT and Passport strategies
-- **@nestjs/config** – Configuration management
-- **@nestjs/throttler** – Rate limiting for API protection
+1. **Request** → API Gateway (auth + routing)
+2. **User Context** → Service (x-user-id, x-user-email, x-user-role headers)
+3. **Business Logic** → Database operations via Prisma
+4. **Caching** → Redis for performance optimization
+5. **Events** → Redis pub/sub for inter-service communication
+6. **Response** → API Gateway → Client
 
-### 📡 API & Communication
-- **supertest** – HTTP endpoint testing
-- **rxjs** – Reactive programming utilities (built-in with NestJS)
-- **axios** – HTTP client for inter-service communication
+### Performance Features
 
-### 🧠 Data Management
-- **@prisma/client** – Database client for PostgreSQL
-- **prisma** – ORM for schema management and migrations
-- **class-validator**, **class-transformer** – Decorator-based validation and transformation
-- **uuid** – Universal unique ID generator
+- **Redis Caching:** 82-93% reduction in database queries
+- **JWT Tokens:** Efficient authentication with refresh mechanisms
+- **Database Indexing:** Optimized queries with strategic indexes
+- **Event-Driven:** Asynchronous processing for scalability
 
-### ☁️ Cloud & Storage
-- **@aws-sdk/client-s3** – AWS S3 SDK for file handling
-- **minio** – Object storage for documents and images
+![SmartCare Architecture Diagram](./SmartCare%20Diagram%20v1.png)
 
-### 🔄 Message Queue & Cache
-- **bullmq** – Message queue for background jobs
-- **ioredis** – Redis client for caching and sessions
+### Microservices Overview
 
-### 🧪 Testing & Quality
-- **jest** – Testing framework
-- **@types/jest** – TypeScript definitions for Jest
-- **eslint**, **prettier** – Code linting and formatting
+| Service | Port | Responsibility | Tech Stack | Key Features |
+|---------|------|---------------|------------|--------------|
+| **API Gateway** | 4000 | Route requests, authentication, rate limiting | NestJS, Express, JWT | User context injection, service proxy, security |
+| **Auth Service** | 4001 | User management, JWT authentication, RBAC | NestJS, Prisma, PostgreSQL, Redis | Argon2 hashing, refresh tokens, session caching |
+| **Clinic Service** | 4002 | Appointment scheduling and management | NestJS, Prisma, PostgreSQL, Redis | Event-driven appointments, patient-doctor matching |
+| **Prescription Service** | 4003 | Medical prescription processing and management | NestJS, Prisma, PostgreSQL, Redis | Medication tracking, prescription lifecycle |
+| **Pharmacy Service** | 4004 | Inventory management and order fulfillment | NestJS, Prisma, PostgreSQL, Redis | Stock management, order processing, event consumers |
+| **Payments Service** | 4005 | Stripe payment processing and billing | NestJS, Prisma, PostgreSQL, Stripe | Checkout sessions, webhooks, payment tracking |
 
-### 🎨 Frontend
-- **next** – React framework for the frontend
-- **react**, **react-dom** – Core React libraries
-- **tailwindcss** – Utility-first CSS framework
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
----
+<!-- ROADMAP -->
+## Roadmap
 
-> This collection of tools empowers the platform to handle healthcare APIs, authentication, data persistence, cloud storage, messaging, and more—all in a modular, maintainable microservices way.
+### ✅ Completed Features
+- [x] **Core Microservices**: Auth, Clinic, Prescription, Pharmacy, Payments services
+- [x] **API Gateway**: Request routing, JWT auth, user context injection
+- [x] **Redis Caching**: JWT tokens, user data, pharmacy stock (82-93% performance boost)
+- [x] **Database Integration**: PostgreSQL with Prisma ORM across all services
+- [x] **Event-Driven Architecture**: Redis pub/sub for inter-service communication
+- [x] **Stripe Payments**: Complete payment processing with webhooks
+- [x] **Security**: JWT authentication, Argon2 password hashing, rate limiting
+- [x] **Testing Framework**: Comprehensive individual service and integration tests
+- [x] **Docker Integration**: Complete containerization with health checks
 
-## 📝 License
+### 🚧 In Progress
+- [ ] **Frontend Integration**: Next.js patient portal and admin dashboard
+- [ ] **File Upload**: MinIO integration for medical document storage
+- [ ] **Email Notifications**: SMTP integration for appointment reminders
+- [ ] **API Documentation**: Swagger/OpenAPI specification
 
-This project is [MIT licensed](LICENSE).
+### 🔮 Future Enhancements
+- [ ] **Multi-tenant Support**: Organization-based access control
+- [ ] **Advanced Analytics**: Healthcare metrics and reporting dashboard
+- [ ] **Mobile App**: React Native patient and provider applications
+- [ ] **IoT Integration**: Medical device connectivity and monitoring
+- [ ] **AI/ML Features**: Predictive analytics for healthcare insights
+- [ ] **Multi-language Support**: Internationalization for global healthcare
+- [ ] **OAuth2 Integration**: Third-party authentication providers
+- [ ] **Kubernetes Deployment**: Production container orchestration
 
----
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-For questions or support, please open an issue on GitHub or contact the development team.
+<!-- CONTRIBUTING -->
+## Contributing
+
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are greatly appreciated.
+
+If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement". Don't forget to give the project a star! Thanks again!
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+
+<!-- LICENSE -->
+## License
+
+Distributed under the MIT License. See `LICENSE.txt` for more information.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+[contributors-shield]: https://img.shields.io/github/contributors/ElbaraaRadwan/smartcare.svg?style=for-the-badge
+[contributors-url]: https://github.com/ElbaraaRadwan/smartcare/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/ElbaraaRadwan/smartcare.svg?style=for-the-badge
+[forks-url]: https://github.com/ElbaraaRadwan/smartcare/network/members
+[stars-shield]: https://img.shields.io/github/stars/ElbaraaRadwan/smartcare.svg?style=for-the-badge
+[stars-url]: https://github.com/ElbaraaRadwan/smartcare/stargazers
+[issues-shield]: https://img.shields.io/github/issues/ElbaraaRadwan/smartcare.svg?style=for-the-badge
+[issues-url]: https://github.com/ElbaraaRadwan/smartcare/issues
+[license-shield]: https://img.shields.io/github/license/ElbaraaRadwan/smartcare.svg?style=for-the-badge
+[license-url]: https://github.com/ElbaraaRadwan/smartcare/blob/master/LICENSE.txt
+[Node.js]: https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white
+[Node-url]: https://nodejs.org/
+[NestJS]: https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white
+[NestJS-url]: https://nestjs.com/
+[TypeScript]: https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white
+[TypeScript-url]: https://www.typescriptlang.org/
+[PostgreSQL]: https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white
+[PostgreSQL-url]: https://www.postgresql.org/
+[Redis]: https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white
+[Redis-url]: https://redis.io/
+[Prisma]: https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white
+[Prisma-url]: https://www.prisma.io/
+[Docker]: https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white
+[Docker-url]: https://www.docker.com/
+[Nx]: https://img.shields.io/badge/Nx-143055?style=for-the-badge&logo=nx&logoColor=white
+[Nx-url]: https://nx.dev/

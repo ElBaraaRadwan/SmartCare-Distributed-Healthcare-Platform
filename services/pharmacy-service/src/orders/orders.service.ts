@@ -94,33 +94,78 @@ export class OrdersService {
   }
 
   async findAll(filters?: { pharmacyId?: string; status?: string }) {
-    return this.prisma.order.findMany({
+    const orders = await this.prisma.order.findMany({
       where: {
         ...(filters?.pharmacyId && { pharmacyId: filters.pharmacyId }),
         ...(filters?.status && { status: filters.status as any }),
-      },
-      include: {
-        medications: true,
       },
       orderBy: {
         createdAt: 'desc',
       },
     });
+
+    // Get medications for each order with pricing from stocks
+    const ordersWithMedications = await Promise.all(
+      orders.map(async (order) => {
+        const medications = await this.prisma.medication.findMany({
+          where: { prescriptionId: order.prescriptionId },
+        });
+
+        // Get prices from stocks table
+        const medicationsWithPrices = await Promise.all(
+          medications.map(async (med) => {
+            const stock = await this.prisma.stock.findUnique({
+              where: { drugName: med.name },
+            });
+
+            return {
+              ...med,
+              price: stock?.price || 0,
+            };
+          })
+        );
+
+        return {
+          ...order,
+          medications: medicationsWithPrices,
+        };
+      })
+    );
+
+    return ordersWithMedications;
   }
 
   async findOne(id: string) {
     const order = await this.prisma.order.findUnique({
       where: { id },
-      include: {
-        medications: true,
-      },
     });
 
     if (!order) {
       throw new NotFoundException(`Order ${id} not found`);
     }
 
-    return order;
+    // Get medications with pricing
+    const medications = await this.prisma.medication.findMany({
+      where: { prescriptionId: order.prescriptionId },
+    });
+
+    const medicationsWithPrices = await Promise.all(
+      medications.map(async (med) => {
+        const stock = await this.prisma.stock.findUnique({
+          where: { drugName: med.name },
+        });
+
+        return {
+          ...med,
+          price: stock?.price || 0,
+        };
+      })
+    );
+
+    return {
+      ...order,
+      medications: medicationsWithPrices,
+    };
   }
 
   async findByPrescriptionId(prescriptionId: string) {
@@ -148,10 +193,10 @@ export class OrdersService {
     // Deduct from stock
     for (const item of order.medications) {
       try {
-        await this.stockService.adjustQuantity(item.drugName, -item.quantity);
-        this.logger.log(`Stock adjusted: ${item.drugName} (-${item.quantity})`);
+        await this.stockService.adjustQuantity((item as any).name, -item.quantity);
+        this.logger.log(`Stock adjusted: ${(item as any).name} (-${item.quantity})`);
       } catch (error) {
-        this.logger.error(`Failed to adjust stock for ${item.drugName}:`, error.message);
+        this.logger.error(`Failed to adjust stock for ${(item as any).name}:`, error.message);
       }
     }
 
@@ -192,10 +237,10 @@ export class OrdersService {
     if (order.status === 'CONFIRMED') {
       for (const item of order.medications) {
         try {
-          await this.stockService.adjustQuantity(item.drugName, item.quantity);
-          this.logger.log(`Stock restored: ${item.drugName} (+${item.quantity})`);
+          await this.stockService.adjustQuantity((item as any).name, item.quantity);
+          this.logger.log(`Stock restored: ${(item as any).name} (+${item.quantity})`);
         } catch (error) {
-          this.logger.error(`Failed to restore stock for ${item.drugName}:`, error.message);
+          this.logger.error(`Failed to restore stock for ${(item as any).name}:`, error.message);
         }
       }
     }

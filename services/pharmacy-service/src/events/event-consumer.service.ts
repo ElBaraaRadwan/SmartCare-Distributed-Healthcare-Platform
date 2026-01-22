@@ -2,6 +2,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
 import { EVENT_TYPES } from '@smartcare/common';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class EventConsumerService implements OnModuleInit {
@@ -10,8 +11,11 @@ export class EventConsumerService implements OnModuleInit {
 
   constructor(
     private configService: ConfigService,
+    private prisma: PrismaService,
   ) {
     const redisUrl = this.configService.get('REDIS_URL') || 'redis://localhost:6379';
+
+    // Create a separate connection for subscribing (read-only)
     this.subscriber = new Redis(redisUrl);
 
     this.subscriber.on('connect', () => {
@@ -58,12 +62,64 @@ export class EventConsumerService implements OnModuleInit {
   private async handlePrescriptionCreated(data: any) {
     this.logger.log(`Processing PRESCRIPTION_CREATED for prescription ${data.prescriptionId}`);
 
-    // For now, just log the event. In a production system, you would:
-    // 1. Store the event in a queue/table for processing
-    // 2. Use a job scheduler to process orders
-    // 3. Or use a message broker pattern
+    try {
+      const { prescriptionId, doctorId, patientId, medications } = data;
 
-    this.logger.log(`Prescription received: ${JSON.stringify(data)}`);
+      // Check if order already exists
+      const existingOrder = await this.prisma.order.findUnique({
+        where: { prescriptionId },
+      });
+
+      if (existingOrder) {
+        this.logger.warn(`Order already exists for prescription ${prescriptionId}`);
+        return;
+      }
+
+      // Calculate total from medications (using pharmacy stock prices)
+      let total = 0;
+      const orderItems: Array<{ drugName: string; quantity: number; price: number }> = [];
+
+      for (const med of medications) {
+        // Find the medication in stock
+        const stock = await this.prisma.stock.findUnique({
+          where: { drugName: med.name },
+        });
+
+        if (stock) {
+          const itemTotal = stock.price * med.quantity;
+          total += itemTotal;
+
+          orderItems.push({
+            drugName: med.name,
+            quantity: med.quantity,
+            price: stock.price,
+          });
+        } else {
+          this.logger.warn(`Medication ${med.name} not found in stock`);
+        }
+      }
+
+      // Create the order
+      const order = await this.prisma.order.create({
+        data: {
+          prescriptionId,
+          pharmacyId: 'default-pharmacy-001', // In production, this would be dynamic
+          status: 'PENDING',
+          total,
+          medications: {
+            create: orderItems,
+          },
+        },
+        include: {
+          medications: true,
+        },
+      });
+
+      this.logger.log(`✅ Order created: ${order.id} for prescription ${prescriptionId} (Total: $${total})`);
+
+    } catch (error) {
+      this.logger.error(`Failed to create order for prescription ${data.prescriptionId}:`, error);
+    }
   }
 
   async onModuleDestroy() {

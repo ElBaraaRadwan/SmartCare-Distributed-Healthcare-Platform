@@ -6,6 +6,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { EventEmitterService } from '../events/event-emitter.service';
 import { OcrService } from '../ocr/ocr.service';
+import { RedisService } from '../redis/redis.service';
 import { CreatePrescriptionDto } from './dto/create-prescription.dto';
 import { CreatePrescriptionOcrDto } from './dto/create-prescription-ocr.dto';
 
@@ -15,6 +16,7 @@ export class PrescriptionsService {
     private prisma: PrismaService,
     private eventEmitter: EventEmitterService,
     private ocrService: OcrService,
+    private redisService: RedisService,
   ) {}
 
   async create(dto: CreatePrescriptionDto, user: any) {
@@ -41,6 +43,10 @@ export class PrescriptionsService {
         medications: true,
       },
     });
+
+    // Invalidate patient prescription cache
+    const cacheKey = `prescription:patient:${prescription.patientId}:history`;
+    await this.redisService.del(cacheKey);
 
     // Emit PRESCRIPTION_CREATED event
     await this.eventEmitter.emit('PRESCRIPTION_CREATED', {
@@ -92,6 +98,10 @@ export class PrescriptionsService {
       },
     });
 
+    // Invalidate patient prescription cache
+    const cacheKey = `prescription:patient:${prescription.patientId}:history`;
+    await this.redisService.del(cacheKey);
+
     // Emit event
     await this.eventEmitter.emit('PRESCRIPTION_CREATED', {
       prescriptionId: prescription.id,
@@ -114,6 +124,33 @@ export class PrescriptionsService {
   }
 
   async findAll(filters: any) {
+    // Cache patient prescription history for performance
+    if (filters.patientId && !filters.doctorId && !filters.status) {
+      const cacheKey = `prescription:patient:${filters.patientId}:history`;
+
+      let prescriptions = await this.redisService.get<any[]>(cacheKey);
+
+      if (!prescriptions) {
+        prescriptions = await this.prisma.prescription.findMany({
+          where: {
+            patientId: filters.patientId,
+          },
+          include: {
+            medications: true,
+          },
+          orderBy: {
+            createdAt: 'desc',
+          },
+        });
+
+        // Cache for 30 minutes
+        await this.redisService.set(cacheKey, prescriptions, 1800);
+      }
+
+      return prescriptions;
+    }
+
+    // For other queries, don't cache
     return this.prisma.prescription.findMany({
       where: {
         ...(filters.patientId && { patientId: filters.patientId }),
@@ -153,12 +190,18 @@ export class PrescriptionsService {
       );
     }
 
-    return this.prisma.prescription.update({
+    const cancelled = await this.prisma.prescription.update({
       where: { id },
       data: { status: 'CANCELLED' },
       include: {
         medications: true,
       },
     });
+
+    // Invalidate patient prescription cache
+    const cacheKey = `prescription:patient:${cancelled.patientId}:history`;
+    await this.redisService.del(cacheKey);
+
+    return cancelled;
   }
 }
