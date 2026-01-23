@@ -71,9 +71,15 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-SmartCare is a distributed healthcare platform designed to streamline healthcare operations through a microservices architecture. It provides comprehensive solutions for patient management, clinic operations, prescription handling, and billing, all while ensuring high security, scalability, and maintainability.
+SmartCare is a **secure distributed healthcare platform** built with NestJS, following microservices architecture principles to deliver scalable and HIPAA-compliant healthcare solutions.
 
-The platform integrates key services such as authentication and authorization, clinic and appointment management, prescriptions and pharmacy operations, payments and billing, notifications, and OCR for medical documents. Emphasizing role-based access control, event-driven communication, and clean architecture, SmartCare aims to deliver reliable and efficient healthcare services.
+The platform integrates key services such as authentication, clinic management, prescriptions, pharmacy operations, and payments, with enterprise-grade security including encrypted event communication, PHI audit logging, and account protection.
+
+### 🔒 Security Features
+- **Event Encryption**: AES-256-GCM encryption for inter-service communication
+- **PHI Audit Logging**: HIPAA-compliant access tracking for protected health information
+- **Account Protection**: Brute force prevention with Redis-based lockout
+- **Rate Limiting**: Distributed rate limiting with Redis backend
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -186,7 +192,6 @@ SmartCare implements a modern microservices architecture with advanced caching a
 - Rate limiting (100 requests/minute)
 - User context injection to downstream services
 - Request routing and load balancing
-- Security headers and CORS
 
 **Microservices:**
 - **Auth Service:** User management, JWT tokens, Redis session caching
@@ -197,8 +202,8 @@ SmartCare implements a modern microservices architecture with advanced caching a
 
 **Infrastructure:**
 - **PostgreSQL:** Primary database with Prisma ORM
-- **Redis:** Caching (user data, JWT tokens) + Event messaging
-- **MinIO:** S3-compatible file storage for medical documents
+- **Redis:** Caching + Event messaging
+- **MinIO:** S3-compatible file storage
 - **Docker:** Containerized deployment with health checks
 
 ### Data Flow
@@ -217,18 +222,18 @@ SmartCare implements a modern microservices architecture with advanced caching a
 - **Database Indexing:** Optimized queries with strategic indexes
 - **Event-Driven:** Asynchronous processing for scalability
 
-![SmartCare Architecture Diagram](./SmartCare%20Diagram%20v1.png)
+![SmartCare Database Architecture](./SmartCare%20Diagram.png)
 
 ### Microservices Overview
 
-| Service | Port | Responsibility | Tech Stack | Key Features |
-|---------|------|---------------|------------|--------------|
-| **API Gateway** | 4000 | Route requests, authentication, rate limiting | NestJS, Express, JWT | User context injection, service proxy, security |
-| **Auth Service** | 4001 | User management, JWT authentication, RBAC | NestJS, Prisma, PostgreSQL, Redis | Argon2 hashing, refresh tokens, session caching |
-| **Clinic Service** | 4002 | Appointment scheduling and management | NestJS, Prisma, PostgreSQL, Redis | Event-driven appointments, patient-doctor matching |
-| **Prescription Service** | 4003 | Medical prescription processing and management | NestJS, Prisma, PostgreSQL, Redis | Medication tracking, prescription lifecycle |
-| **Pharmacy Service** | 4004 | Inventory management and order fulfillment | NestJS, Prisma, PostgreSQL, Redis | Stock management, order processing, event consumers |
-| **Payments Service** | 4005 | Stripe payment processing and billing | NestJS, Prisma, PostgreSQL, Stripe | Checkout sessions, webhooks, payment tracking |
+| Service | Port | Responsibility | Tech Stack |
+|---------|------|---------------|------------|
+| **API Gateway** | 4000 | Route requests, authentication, rate limiting | NestJS, Express, JWT, Redis |
+| **Auth Service** | 4001 | User management, JWT authentication, RBAC | NestJS, Prisma, PostgreSQL, Redis |
+| **Clinic Service** | 4002 | Appointment scheduling and management | NestJS, Prisma, PostgreSQL, Redis |
+| **Prescription Service** | 4003 | Medical prescription processing and tracking | NestJS, Prisma, PostgreSQL, Redis |
+| **Pharmacy Service** | 4004 | Inventory management and order fulfillment | NestJS, Prisma, PostgreSQL, Redis |
+| **Payments Service** | 4005 | Stripe payment processing and billing | NestJS, Prisma, PostgreSQL, Stripe |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -245,12 +250,13 @@ SmartCare implements a modern microservices architecture with advanced caching a
 - [x] **Security**: JWT authentication, Argon2 password hashing, rate limiting
 - [x] **Testing Framework**: Comprehensive individual service and integration tests
 - [x] **Docker Integration**: Complete containerization with health checks
+- [x] **Enterprise Security**: AES-256-GCM encryption, PHI audit logging, account protection
 
 ### 🚧 In Progress
 - [ ] **Frontend Integration**: Next.js patient portal and admin dashboard
 - [ ] **File Upload**: MinIO integration for medical document storage
 - [ ] **Email Notifications**: SMTP integration for appointment reminders
-- [ ] **API Documentation**: Swagger/OpenAPI specification
+- [ ] **API Documentation**: Enhanced Swagger/OpenAPI with security schemas
 
 ### 🔮 Future Enhancements
 - [ ] **Multi-tenant Support**: Organization-based access control
