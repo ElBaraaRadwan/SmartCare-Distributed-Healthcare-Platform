@@ -5,6 +5,7 @@ import { EventsModule } from './events/events.module';
 import { OcrModule } from './ocr/ocr.module';
 import { PrescriptionsModule } from './prescriptions/prescriptions.module';
 import { RedisModule } from './redis/redis.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { RedisModule } from './redis/redis.module';
     EventsModule,
     OcrModule,
     PrescriptionsModule,
+    HealthModule,
   ],
 })
 export class AppModule {}

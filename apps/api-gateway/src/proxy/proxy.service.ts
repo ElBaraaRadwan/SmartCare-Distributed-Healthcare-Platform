@@ -1,8 +1,22 @@
-import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  BadGatewayException,
+  NotFoundException,
+  InternalServerErrorException,
+  BadRequestException,
+  UnauthorizedException,
+  ForbiddenException,
+  ConflictException,
+  UnprocessableEntityException,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
-import { AxiosError, AxiosRequestHeaders, Method } from 'axios';
+import { AxiosError, Method } from 'axios';
+import { ServiceType } from '../common/enums';
 
 @Injectable()
 export class ProxyService {
@@ -14,7 +28,7 @@ export class ProxyService {
   ) {}
 
   async proxyRequest(
-    serviceName: string,
+    serviceName: ServiceType,
     path: string,
     method: Method,
     body?: Buffer | Record<string, any>,
@@ -27,7 +41,9 @@ export class ProxyService {
     this.logger.log(`Proxying request to ${serviceName} service:`);
     this.logger.log(`  URL: ${url}`);
     this.logger.log(`  Method: ${method}`);
-    this.logger.log(`  Body (type: ${typeof body}, length: ${body instanceof Buffer ? body.length : 'N/A'}): ${body instanceof Buffer ? '[Buffer]' : JSON.stringify(body)}`);
+    this.logger.log(
+      `  Body (type: ${typeof body}, length: ${body instanceof Buffer ? body.length : 'N/A'}): ${body instanceof Buffer ? '[Buffer]' : JSON.stringify(body)}`,
+    );
     this.logger.log(`  Headers: ${JSON.stringify(headers)}`);
     this.logger.log(`  User context: ${JSON.stringify(user)}`);
 
@@ -40,8 +56,8 @@ export class ProxyService {
           headers: {
             // Don't pass through all original headers, only essential ones
             'Content-Type': headers?.['content-type'] || 'application/json',
-            'Accept': headers?.['accept'] || '*/*',
-            'Authorization': headers?.['authorization'], // Pass through auth header
+            Accept: headers?.['accept'] || '*/*',
+            Authorization: headers?.['authorization'], // Pass through auth header
             // Inject user context headers for downstream services
             ...(user && {
               'x-user-id': user.userId,
@@ -52,7 +68,9 @@ export class ProxyService {
         }),
       );
 
-      this.logger.log(`Successfully proxied request to ${serviceName} service.`);
+      this.logger.log(
+        `Successfully proxied request to ${serviceName} service.`,
+      );
       return response.data as unknown;
     } catch (error) {
       this.handleProxyError(error as AxiosError);
@@ -94,20 +112,35 @@ export class ProxyService {
 
   private handleProxyError(error: AxiosError) {
     if (error.response) {
-      throw new HttpException(
-        error.response.data || 'Service error',
-        error.response.status,
-      );
+      const status = error.response.status;
+      const message = error.response.data || 'Service error';
+
+      switch (status) {
+        case 400:
+          throw new BadRequestException(message);
+        case 401:
+          throw new UnauthorizedException(message);
+        case 403:
+          throw new ForbiddenException(message);
+        case 404:
+          throw new NotFoundException(message);
+        case 409:
+          throw new ConflictException(message);
+        case 422:
+          throw new UnprocessableEntityException(message);
+        case 500:
+          throw new InternalServerErrorException(message);
+        case 502:
+        case 503:
+        case 504:
+          throw new BadGatewayException(message);
+        default:
+          throw new HttpException(message, status);
+      }
     } else if (error.request) {
-      throw new HttpException(
-        'Service unavailable',
-        HttpStatus.SERVICE_UNAVAILABLE,
-      );
+      throw new BadGatewayException('Service unavailable');
     } else {
-      throw new HttpException(
-        'Internal server error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw new InternalServerErrorException('Internal server error');
     }
   }
 }

@@ -8,6 +8,7 @@ import {
   Param,
   Query,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AppointmentsService } from './appointments.service';
 import { AuthenticatedGuard, CurrentUser } from '@smartcare/common';
@@ -15,9 +16,11 @@ import type { IAuthenticatedUser } from '@smartcare/common';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { CompleteAppointmentDto } from './dto/complete.appointment.dto';
+import { AuditLoggingInterceptor } from '../common/prisma-audit-logger.service';
 
 @Controller('appointments')
 @UseGuards(AuthenticatedGuard)
+@UseInterceptors(AuditLoggingInterceptor)
 export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) {}
 

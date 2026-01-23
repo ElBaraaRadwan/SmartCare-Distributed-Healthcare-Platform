@@ -7,6 +7,7 @@ import {
   Query,
   Body,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import {
@@ -15,9 +16,11 @@ import {
 } from '@smartcare/common';
 import type { IAuthenticatedUser } from '@smartcare/common';
 import { ConfirmOrderDto } from './dto/confirm-order.dto';
+import { AuditLoggingInterceptor } from '../common/prisma-audit-logger.service';
 
 @Controller('orders')
 @UseGuards(AuthenticatedGuard)
+@UseInterceptors(AuditLoggingInterceptor)
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
