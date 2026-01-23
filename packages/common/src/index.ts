@@ -15,8 +15,14 @@ export * from './guards/roles.guard';
 // Pipes
 export * from './pipes/validation.pipe';
 
+// Interceptors
+export * from './interceptors/audit-logging.interceptor';
+
 // Services
 export * from './services/security-logger.service';
+
+// Utils
+export * from './utils/event-encryption';
 
 // Constants
 export * from './constants/events';

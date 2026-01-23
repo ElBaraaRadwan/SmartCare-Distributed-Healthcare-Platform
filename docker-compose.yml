@@ -1,17 +1,18 @@
 version: '3.8'
-
 services:
   postgres:
     image: postgres:15-alpine
     container_name: smartcare_postgres
     environment:
       POSTGRES_USER: smartcare
-      POSTGRES_PASSWORD: smartcare_dev_pass
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: smartcare_dev
-    ports:
-      - "5432:5432"
+    # ports:  # ❌ REMOVED - no public exposure
+    #   - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - internal
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U smartcare"]
       interval: 10s
@@ -21,12 +22,13 @@ services:
   redis:
     image: redis:7-alpine
     container_name: smartcare_redis
+    command: redis-server --requirepass ${REDIS_PASSWORD}  # ✅ Added password requirement
     ports:
-      - "6379:6379"
+      - "6379:6379"  # ✅ Exposed for host development services
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]  # ✅ Updated with password
       interval: 10s
       timeout: 5s
       retries: 5
@@ -48,6 +50,11 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
+
+networks:
+  internal:
+    driver: bridge
+    internal: true
 
 volumes:
   postgres_data:

@@ -2,7 +2,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
 import { PaymentsService } from '../payments/payments.service';
-import { EVENT_TYPES } from '@smartcare/common';
+import { EVENT_TYPES, EventEncryption } from '@smartcare/common';
 
 @Injectable()
 export class EventConsumerService implements OnModuleInit {
@@ -13,8 +13,24 @@ export class EventConsumerService implements OnModuleInit {
     private configService: ConfigService,
     private paymentsService: PaymentsService,
   ) {
-    const redisUrl = this.configService.get('REDIS_URL') || 'redis://localhost:6379';
-    this.subscriber = new Redis(redisUrl);
+    const redisHost = this.configService.get<string>('REDIS_HOST') ?? 'localhost';
+    const redisPort = this.configService.get<number>('REDIS_PORT') ?? 6379;
+    const redisPassword = this.configService.get<string>('REDIS_PASSWORD');
+
+    // Initialize event encryption
+    const encryptionSecret = this.configService.get<string>('EVENT_ENCRYPTION_SECRET');
+    const hmacSecret = this.configService.get<string>('EVENT_HMAC_SECRET');
+    if (!encryptionSecret) {
+      throw new Error('EVENT_ENCRYPTION_SECRET is required for event decryption');
+    }
+    EventEncryption.initialize(encryptionSecret, hmacSecret);
+
+    this.subscriber = new Redis({
+      host: redisHost,
+      port: redisPort,
+      password: redisPassword,
+      enableReadyCheck: false, // Prevents info() commands that conflict with subscriber mode
+    });
 
     this.subscriber.on('connect', () => {
       this.logger.log('Redis subscriber connected');
@@ -37,6 +53,22 @@ export class EventConsumerService implements OnModuleInit {
     this.subscriber.on('message', async (channel, message) => {
       try {
         const event = JSON.parse(message);
+
+        // Verify HMAC signature first
+        const { signature, ...eventPayload } = event;
+        const eventString = JSON.stringify(eventPayload);
+        if (!EventEncryption.verify(eventString, signature)) {
+          this.logger.error(`Invalid HMAC signature for event ${event.eventId}`);
+          return;
+        }
+
+        // Decrypt the event data
+        const decryptedData = EventEncryption.decrypt(
+          event.data.encrypted,
+          event.data.iv,
+          event.data.tag
+        );
+        event.data = decryptedData;
         await this.handleEvent(event);
       } catch (error) {
         this.logger.error('Error processing event:', error);

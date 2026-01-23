@@ -160,3 +160,23 @@ model Medication {
   @@index([prescriptionId])
   @@map("medications")
 }
+
+// ✅ PHI Access Audit Logging
+model AuditLog {
+  id             String   @id @default(uuid())
+  userId         String?
+  userEmail      String?
+  userRole       String?
+  action         String
+  resource       String
+  ipAddress      String?
+  userAgent      String?
+  requestBody    Json?
+  responseStatus Int?
+  timestamp      DateTime @default(now())
+
+  @@index([userId])
+  @@index([timestamp])
+  @@index([resource])
+  @@map("audit_logs")
+}
