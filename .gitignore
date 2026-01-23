@@ -68,3 +68,7 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # Nx workspace cache
 .nx/
+
+# Diagrams
+*.mmd
+*.drawio
