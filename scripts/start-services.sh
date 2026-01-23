@@ -44,7 +44,21 @@ if ! docker ps | grep -q smartcare_redis; then
     exit 1
 fi
 
+if ! docker ps | grep -q smartcare_minio; then
+    print_status "FAIL" "MinIO not running. Run: docker compose up -d postgres redis minio"
+    exit 1
+fi
+
 print_status "PASS" "Infrastructure services are running"
+
+# Setup MinIO if needed
+echo ""
+echo "Setting up MinIO storage..."
+if ! ./scripts/setup-minio.sh; then
+    print_status "FAIL" "MinIO setup failed"
+    exit 1
+fi
+print_status "PASS" "MinIO storage configured"
 
 # Check if database is set up
 if ! docker exec smartcare_postgres psql -U smartcare -d smartcare_dev -c "SELECT 1 FROM users LIMIT 1;" >/dev/null 2>&1; then

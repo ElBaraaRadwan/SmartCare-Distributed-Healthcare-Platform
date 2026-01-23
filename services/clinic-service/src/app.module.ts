@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config'; // Import ConfigSe
 import { PrismaModule } from './prisma/prisma.module';
 import { EventsModule } from './events/events.module';
 import { AppointmentsModule } from './appointments/appointments.module';
+import { FilesModule } from './files/files.module';
 import { JwtModule } from '@nestjs/jwt'; // Import JwtModule
 import { PassportModule } from '@nestjs/passport'; // Import PassportModule
 
@@ -14,6 +15,7 @@ import { PassportModule } from '@nestjs/passport'; // Import PassportModule
     PrismaModule,
     EventsModule,
     AppointmentsModule,
+    FilesModule,
     PassportModule.register({ session: false }), // Register Passport module
     JwtModule.registerAsync({
       imports: [ConfigModule],

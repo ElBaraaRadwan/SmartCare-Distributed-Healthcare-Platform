@@ -37,6 +37,7 @@ model Appointment {
   status         AppointmentStatus   @default(PENDING)
   notes          String?
   consultation   Consultation?
+  files          File[]              // Associated files
   createdAt      DateTime            @default(now())
   updatedAt      DateTime            @updatedAt
 
@@ -61,6 +62,7 @@ model Consultation {
   notes         String
   duration      Int?
   videoUrl      String?
+  files         File[]       // Associated files
   createdAt     DateTime     @default(now())
 
   @@map("consultations")
@@ -84,4 +86,48 @@ model AuditLog {
   @@index([timestamp])
   @@index([resource])
   @@map("audit_logs")
+}
+
+// ✅ Medical Document File Storage
+model File {
+  id              String      @id @default(uuid())
+  filename        String
+  originalName    String
+  mimeType        String
+  size            Int
+  hash            String      // SHA-256 hash for integrity verification
+  bucket          String      @default("smartcare-medical-docs")
+  key             String      // MinIO object key
+  uploadedBy      String      // User ID who uploaded
+  uploadedByRole  String      // User role for audit
+  patientId       String?     // Associated patient (for access control)
+  appointmentId   String?     // Associated appointment
+  consultationId  String?     // Associated consultation
+  category        FileCategory @default(MEDICAL_DOCUMENT)
+  isDeleted       Boolean     @default(false)
+  deletedAt       DateTime?
+  deletedBy       String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Relations
+  appointment     Appointment? @relation(fields: [appointmentId], references: [id])
+  consultation    Consultation? @relation(fields: [consultationId], references: [id])
+
+  @@index([uploadedBy])
+  @@index([patientId])
+  @@index([appointmentId])
+  @@index([consultationId])
+  @@index([category])
+  @@index([isDeleted])
+  @@index([createdAt])
+  @@map("files")
+}
+
+enum FileCategory {
+  MEDICAL_DOCUMENT
+  LAB_RESULT
+  PRESCRIPTION_IMAGE
+  INSURANCE_CARD
+  OTHER
 }
