@@ -1,56 +1,34 @@
-# Build stage
 FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
+# Copy root package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Copy the SHARED LIBRARY
+COPY packages/common ./packages/common
 
-# Copy source code
-COPY . .
+# Copy the SERVICE
+COPY services/prescription-service ./services/prescription-service
 
-# Build the application
+# Install dependencies for the specific service
+WORKDIR /app/services/prescription-service
+RUN npm install
+
+# Build the service
 RUN npm run build
 
-# Production stage
+# --- Production Stage ---
 FROM node:18-alpine AS production
-
-# Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
-
-# Create app user
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nestjs -u 1001
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Copy built assets
+COPY --from=builder /app/services/prescription-service/dist ./dist
+COPY --from=builder /app/services/prescription-service/node_modules ./node_modules
+COPY --from=builder /app/services/prescription-service/package.json ./
+COPY --from=builder /app/services/prescription-service/prisma ./prisma
 
-# Install production dependencies only
-RUN npm ci --only=production && npm cache clean --force
-
-# Copy built application
-COPY --from=builder /app/dist ./dist
-
-# Copy Prisma schema and migrations
-COPY --from=builder /app/prisma ./prisma
-
-# Create directory for logs
-RUN mkdir -p /app/logs && chown -R nestjs:nodejs /app
-
-USER nestjs
-
-# Expose port
 EXPOSE 4003
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:4003/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
-
-# Start the application
-ENTRYPOINT ["dumb-init", "--"]
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/main"]
