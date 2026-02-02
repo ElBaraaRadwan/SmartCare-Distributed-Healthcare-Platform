@@ -9,14 +9,19 @@ export class EventEmitterService {
   private readonly logger = new Logger(EventEmitterService.name);
 
   constructor(private config: ConfigService) {
-    const redisHost = this.config.get<string>('REDIS_HOST') ?? 'localhost';
-    const redisPort = this.config.get<number>('REDIS_PORT') ?? 6379;
-    const redisPassword = this.config.get<string>('REDIS_PASSWORD');
-    this.publisher = new Redis({
-      host: redisHost,
-      port: redisPort,
-      password: redisPassword,
-    });
+    const redisUrl = this.config.get<string>('REDIS_URL');
+    if (redisUrl) {
+      this.publisher = new Redis(redisUrl);
+    } else {
+      const redisHost = this.config.get<string>('REDIS_HOST') ?? 'localhost';
+      const redisPort = this.config.get<number>('REDIS_PORT') ?? 6379;
+      const redisPassword = this.config.get<string>('REDIS_PASSWORD');
+      this.publisher = new Redis({
+        host: redisHost,
+        port: redisPort,
+        password: redisPassword,
+      });
+    }
 
     // Initialize event encryption
     const encryptionSecret = this.config.get<string>('EVENT_ENCRYPTION_SECRET');

@@ -11,15 +11,22 @@ import { RedisService } from './redis.service';
       isGlobal: true,
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (config: ConfigService) => ({
-        store: await redisStore({
-          socket: {
-            host: config.get<string>('REDIS_HOST', 'localhost'),
-            port: config.get<number>('REDIS_PORT', 6379),
-          },
-          password: config.get<string>('REDIS_PASSWORD'),
-        }) as any,
-      } as any),
+      useFactory: async (config: ConfigService) => {
+        const url = config.get<string>('REDIS_URL');
+        const storeConfig = url
+          ? { url }
+          : {
+              socket: {
+                host: config.get<string>('REDIS_HOST', 'localhost'),
+                port: config.get<number>('REDIS_PORT', 6379),
+              },
+              password: config.get<string>('REDIS_PASSWORD'),
+            };
+
+        return {
+          store: await redisStore(storeConfig as any),
+        } as any;
+      },
     }),
   ],
   exports: [CacheModule, RedisService],

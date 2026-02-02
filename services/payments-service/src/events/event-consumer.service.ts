@@ -13,24 +13,23 @@ export class EventConsumerService implements OnModuleInit {
     private configService: ConfigService,
     private paymentsService: PaymentsService,
   ) {
-    const redisHost = this.configService.get<string>('REDIS_HOST') ?? 'localhost';
-    const redisPort = this.configService.get<number>('REDIS_PORT') ?? 6379;
-    const redisPassword = this.configService.get<string>('REDIS_PASSWORD');
+    const redisUrl = this.configService.get<string>('REDIS_URL');
+    if (redisUrl) {
+      this.subscriber = new Redis(redisUrl, {
+        enableReadyCheck: false,
+      });
+    } else {
+      const redisHost = this.configService.get<string>('REDIS_HOST') ?? 'localhost';
+      const redisPort = this.configService.get<number>('REDIS_PORT') ?? 6379;
+      const redisPassword = this.configService.get<string>('REDIS_PASSWORD');
 
-    // Initialize event encryption
-    const encryptionSecret = this.configService.get<string>('EVENT_ENCRYPTION_SECRET');
-    const hmacSecret = this.configService.get<string>('EVENT_HMAC_SECRET');
-    if (!encryptionSecret) {
-      throw new Error('EVENT_ENCRYPTION_SECRET is required for event decryption');
+      this.subscriber = new Redis({
+        host: redisHost,
+        port: redisPort,
+        password: redisPassword,
+        enableReadyCheck: false,
+      });
     }
-    EventEncryption.initialize(encryptionSecret, hmacSecret);
-
-    this.subscriber = new Redis({
-      host: redisHost,
-      port: redisPort,
-      password: redisPassword,
-      enableReadyCheck: false, // Prevents info() commands that conflict with subscriber mode
-    });
 
     this.subscriber.on('connect', () => {
       this.logger.log('Redis subscriber connected');
