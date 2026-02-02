@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, ConflictException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  Logger,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventEmitterService } from '../events/event-emitter.service';
 import { RedisService } from '../redis/redis.service';
@@ -40,7 +45,9 @@ export class StockService {
     await this.redisService.del('pharmacy:stocks:all');
     this.logger.debug('Invalidated stock catalog cache after creation');
 
-    this.logger.log(`Stock created: ${stock.drugName} (Qty: ${stock.quantity})`);
+    this.logger.log(
+      `Stock created: ${stock.drugName} (Qty: ${stock.quantity})`,
+    );
     return stock;
   }
 
@@ -52,7 +59,9 @@ export class StockService {
 
     if (!stocks) {
       // Cache miss - fetch from database
-      this.logger.debug('Cache miss for stock catalog - fetching from database');
+      this.logger.debug(
+        'Cache miss for stock catalog - fetching from database',
+      );
       stocks = await this.prisma.stock.findMany({
         orderBy: {
           drugName: 'asc',
@@ -125,7 +134,9 @@ export class StockService {
 
     // Invalidate stock catalog cache
     await this.redisService.del('pharmacy:stocks:all');
-    this.logger.debug('Invalidated stock catalog cache after quantity adjustment');
+    this.logger.debug(
+      'Invalidated stock catalog cache after quantity adjustment',
+    );
 
     // Check for low stock
     if (updated.quantity <= updated.minThreshold) {
@@ -136,7 +147,9 @@ export class StockService {
         pharmacyId: 'default-pharmacy-001',
       });
 
-      this.logger.warn(`⚠️  Low stock alert: ${updated.drugName} (${updated.quantity} remaining)`);
+      this.logger.warn(
+        `⚠️  Low stock alert: ${updated.drugName} (${updated.quantity} remaining)`,
+      );
     }
 
     return updated;

@@ -9,9 +9,11 @@ export class StripeService {
 
   constructor(private configService: ConfigService) {
     const secretKey = this.configService.get<string>('STRIPE_SECRET_KEY');
-    
+
     if (!secretKey || secretKey.includes('PLACEHOLDER')) {
-      this.logger.warn('⚠️  Stripe secret key not configured. Using test mode with mock data.');
+      this.logger.warn(
+        '⚠️  Stripe secret key not configured. Using test mode with mock data.',
+      );
       // Initialize with a dummy key for development
       this.stripe = new Stripe('sk_test_dummy_key_for_development', {
         apiVersion: '2025-12-15.clover',
@@ -73,10 +75,14 @@ export class StripeService {
     payload: Buffer,
     signature: string,
   ): Promise<Stripe.Event> {
-    const webhookSecret = this.configService.get<string>('STRIPE_WEBHOOK_SECRET');
-    
+    const webhookSecret = this.configService.get<string>(
+      'STRIPE_WEBHOOK_SECRET',
+    );
+
     if (!webhookSecret || webhookSecret.includes('PLACEHOLDER')) {
-      this.logger.warn('Webhook secret not configured. Skipping signature verification.');
+      this.logger.warn(
+        'Webhook secret not configured. Skipping signature verification.',
+      );
       // For development, parse without verification
       return JSON.parse(payload.toString());
     }

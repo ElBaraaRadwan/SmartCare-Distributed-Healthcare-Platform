@@ -10,9 +10,7 @@ import { Inject } from '@nestjs/common';
 export class RedisService {
   private readonly logger = new Logger(RedisService.name);
 
-  constructor(
-    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
-  ) {}
+  constructor(@Inject(CACHE_MANAGER) private readonly cacheManager: Cache) {}
 
   async get<T>(key: string): Promise<T | null> {
     try {

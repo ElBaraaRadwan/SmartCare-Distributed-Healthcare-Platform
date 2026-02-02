@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, ConflictException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { StripeService } from '../stripe/stripe.service';
@@ -41,7 +46,9 @@ export class PaymentsService {
       },
     });
 
-    this.logger.log(`Payment record created: ${payment.id} for order ${orderId} ($${total})`);
+    this.logger.log(
+      `Payment record created: ${payment.id} for order ${orderId} ($${total})`,
+    );
     return payment;
   }
 
@@ -68,10 +75,12 @@ export class PaymentsService {
     }
 
     // Create Stripe checkout session
-    const successUrl = this.configService.get('STRIPE_SUCCESS_URL') || 
+    const successUrl =
+      this.configService.get('STRIPE_SUCCESS_URL') ||
       `${this.configService.get('FRONTEND_URL')}/payment/success?session_id={CHECKOUT_SESSION_ID}`;
-    
-    const cancelUrl = this.configService.get('STRIPE_CANCEL_URL') || 
+
+    const cancelUrl =
+      this.configService.get('STRIPE_CANCEL_URL') ||
       `${this.configService.get('FRONTEND_URL')}/payment/cancel`;
 
     const session = await this.stripeService.createCheckoutSession({
@@ -92,7 +101,9 @@ export class PaymentsService {
       },
     });
 
-    this.logger.log(`Checkout session created: ${session.id} for payment ${payment.id}`);
+    this.logger.log(
+      `Checkout session created: ${session.id} for payment ${payment.id}`,
+    );
 
     return {
       paymentId: updated.id,
@@ -142,7 +153,7 @@ export class PaymentsService {
 
     switch (event.type) {
       case 'checkout.session.completed':
-        await this.handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session);
+        await this.handleCheckoutCompleted(event.data.object);
         break;
 
       case 'payment_intent.succeeded':
@@ -150,7 +161,7 @@ export class PaymentsService {
         break;
 
       case 'payment_intent.payment_failed':
-        await this.handlePaymentFailed(event.data.object as Stripe.PaymentIntent);
+        await this.handlePaymentFailed(event.data.object);
         break;
 
       default:
@@ -188,7 +199,9 @@ export class PaymentsService {
       stripeSessionId: updated.stripeSessionId,
     });
 
-    this.logger.log(`✓ Payment completed: ${updated.id} for order ${updated.orderId}`);
+    this.logger.log(
+      `✓ Payment completed: ${updated.id} for order ${updated.orderId}`,
+    );
   }
 
   private async handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
@@ -197,7 +210,9 @@ export class PaymentsService {
     });
 
     if (!payment) {
-      this.logger.error(`Payment not found for payment intent ${paymentIntent.id}`);
+      this.logger.error(
+        `Payment not found for payment intent ${paymentIntent.id}`,
+      );
       return;
     }
 
@@ -209,6 +224,8 @@ export class PaymentsService {
       },
     });
 
-    this.logger.error(`✗ Payment failed: ${payment.id} for order ${payment.orderId}`);
+    this.logger.error(
+      `✗ Payment failed: ${payment.id} for order ${payment.orderId}`,
+    );
   }
 }

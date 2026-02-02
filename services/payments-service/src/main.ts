@@ -7,11 +7,14 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // Raw body for Stripe webhooks
-  app.use('/payments/webhook', json({ 
-    verify: (req: any, res, buf) => {
-      req.rawBody = buf;
-    }
-  }));
+  app.use(
+    '/payments/webhook',
+    json({
+      verify: (req: any, res, buf) => {
+        req.rawBody = buf;
+      },
+    }),
+  );
 
   app.useGlobalPipes(
     new ValidationPipe({

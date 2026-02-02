@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, ConflictException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  Logger,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventEmitterService } from '../events/event-emitter.service';
 import { StockService } from '../stock/stock.service';
@@ -24,20 +29,28 @@ export class OrdersService {
     });
 
     if (existing) {
-      this.logger.warn(`Order already exists for prescription ${prescriptionId}`);
+      this.logger.warn(
+        `Order already exists for prescription ${prescriptionId}`,
+      );
       return existing;
     }
 
     // Calculate total and check stock availability
     let total = 0;
-    const orderItems: Array<{ drugName: string; quantity: number; price: number }> = [];
+    const orderItems: Array<{
+      drugName: string;
+      quantity: number;
+      price: number;
+    }> = [];
 
     for (const med of medications) {
       try {
         const stock = await this.stockService.findByDrugName(med.name);
 
         if (stock.quantity < med.quantity) {
-          this.logger.warn(`Insufficient stock for ${med.name}: need ${med.quantity}, have ${stock.quantity}`);
+          this.logger.warn(
+            `Insufficient stock for ${med.name}: need ${med.quantity}, have ${stock.quantity}`,
+          );
         }
 
         orderItems.push({
@@ -122,14 +135,14 @@ export class OrdersService {
               ...med,
               price: stock?.price || 0,
             };
-          })
+          }),
         );
 
         return {
           ...order,
           medications: medicationsWithPrices,
         };
-      })
+      }),
     );
 
     return ordersWithMedications;
@@ -159,7 +172,7 @@ export class OrdersService {
           ...med,
           price: stock?.price || 0,
         };
-      })
+      }),
     );
 
     return {
@@ -177,7 +190,9 @@ export class OrdersService {
     });
 
     if (!order) {
-      throw new NotFoundException(`Order for prescription ${prescriptionId} not found`);
+      throw new NotFoundException(
+        `Order for prescription ${prescriptionId} not found`,
+      );
     }
 
     return order;
@@ -193,10 +208,18 @@ export class OrdersService {
     // Deduct from stock
     for (const item of order.medications) {
       try {
-        await this.stockService.adjustQuantity((item as any).name, -item.quantity);
-        this.logger.log(`Stock adjusted: ${(item as any).name} (-${item.quantity})`);
+        await this.stockService.adjustQuantity(
+          (item as any).name,
+          -item.quantity,
+        );
+        this.logger.log(
+          `Stock adjusted: ${(item as any).name} (-${item.quantity})`,
+        );
       } catch (error) {
-        this.logger.error(`Failed to adjust stock for ${(item as any).name}:`, error.message);
+        this.logger.error(
+          `Failed to adjust stock for ${(item as any).name}:`,
+          error.message,
+        );
       }
     }
 
@@ -205,7 +228,9 @@ export class OrdersService {
       where: { id },
       data: {
         status: 'CONFIRMED',
-        estimatedDelivery: dto.estimatedDelivery ? new Date(dto.estimatedDelivery) : null,
+        estimatedDelivery: dto.estimatedDelivery
+          ? new Date(dto.estimatedDelivery)
+          : null,
       },
       include: {
         medications: true,
@@ -230,17 +255,27 @@ export class OrdersService {
     const order = await this.findOne(id);
 
     if (order.status === 'DELIVERED' || order.status === 'SHIPPED') {
-      throw new ConflictException(`Cannot cancel order in ${order.status} status`);
+      throw new ConflictException(
+        `Cannot cancel order in ${order.status} status`,
+      );
     }
 
     // If order was confirmed, restore stock
     if (order.status === 'CONFIRMED') {
       for (const item of order.medications) {
         try {
-          await this.stockService.adjustQuantity((item as any).name, item.quantity);
-          this.logger.log(`Stock restored: ${(item as any).name} (+${item.quantity})`);
+          await this.stockService.adjustQuantity(
+            (item as any).name,
+            item.quantity,
+          );
+          this.logger.log(
+            `Stock restored: ${(item as any).name} (+${item.quantity})`,
+          );
         } catch (error) {
-          this.logger.error(`Failed to restore stock for ${(item as any).name}:`, error.message);
+          this.logger.error(
+            `Failed to restore stock for ${(item as any).name}:`,
+            error.message,
+          );
         }
       }
     }

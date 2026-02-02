@@ -13,15 +13,20 @@ export class EventConsumerService implements OnModuleInit {
     private configService: ConfigService,
     private prisma: PrismaService,
   ) {
-    const redisHost = this.configService.get<string>('REDIS_HOST') ?? 'localhost';
+    const redisHost =
+      this.configService.get<string>('REDIS_HOST') ?? 'localhost';
     const redisPort = this.configService.get<number>('REDIS_PORT') ?? 6379;
     const redisPassword = this.configService.get<string>('REDIS_PASSWORD');
 
     // Initialize event encryption
-    const encryptionSecret = this.configService.get<string>('EVENT_ENCRYPTION_SECRET');
+    const encryptionSecret = this.configService.get<string>(
+      'EVENT_ENCRYPTION_SECRET',
+    );
     const hmacSecret = this.configService.get<string>('EVENT_HMAC_SECRET');
     if (!encryptionSecret) {
-      throw new Error('EVENT_ENCRYPTION_SECRET is required for event decryption');
+      throw new Error(
+        'EVENT_ENCRYPTION_SECRET is required for event decryption',
+      );
     }
     EventEncryption.initialize(encryptionSecret, hmacSecret);
 
@@ -60,7 +65,9 @@ export class EventConsumerService implements OnModuleInit {
         const { signature, ...eventPayload } = event;
         const eventString = JSON.stringify(eventPayload);
         if (!EventEncryption.verify(eventString, signature)) {
-          this.logger.error(`Invalid HMAC signature for event ${event.eventId}`);
+          this.logger.error(
+            `Invalid HMAC signature for event ${event.eventId}`,
+          );
           return;
         }
 
@@ -68,7 +75,7 @@ export class EventConsumerService implements OnModuleInit {
         const decryptedData = EventEncryption.decrypt(
           event.data.encrypted,
           event.data.iv,
-          event.data.tag
+          event.data.tag,
         );
         event.data = decryptedData;
         await this.handleEvent(event);
@@ -92,7 +99,9 @@ export class EventConsumerService implements OnModuleInit {
   }
 
   private async handlePrescriptionCreated(data: any) {
-    this.logger.log(`Processing PRESCRIPTION_CREATED for prescription ${data.prescriptionId}`);
+    this.logger.log(
+      `Processing PRESCRIPTION_CREATED for prescription ${data.prescriptionId}`,
+    );
 
     try {
       const { prescriptionId, doctorId, patientId, medications } = data;
@@ -103,13 +112,19 @@ export class EventConsumerService implements OnModuleInit {
       });
 
       if (existingOrder) {
-        this.logger.warn(`Order already exists for prescription ${prescriptionId}`);
+        this.logger.warn(
+          `Order already exists for prescription ${prescriptionId}`,
+        );
         return;
       }
 
       // Calculate total from medications (using pharmacy stock prices)
       let total = 0;
-      const orderItems: Array<{ drugName: string; quantity: number; price: number }> = [];
+      const orderItems: Array<{
+        drugName: string;
+        quantity: number;
+        price: number;
+      }> = [];
 
       for (const med of medications) {
         // Find the medication in stock
@@ -147,10 +162,14 @@ export class EventConsumerService implements OnModuleInit {
         },
       });
 
-      this.logger.log(`✅ Order created: ${order.id} for prescription ${prescriptionId} (Total: $${total})`);
-
+      this.logger.log(
+        `✅ Order created: ${order.id} for prescription ${prescriptionId} (Total: $${total})`,
+      );
     } catch (error) {
-      this.logger.error(`Failed to create order for prescription ${data.prescriptionId}:`, error);
+      this.logger.error(
+        `Failed to create order for prescription ${data.prescriptionId}:`,
+        error,
+      );
     }
   }
 

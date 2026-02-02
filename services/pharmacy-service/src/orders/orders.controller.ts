@@ -10,10 +10,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
-import {
-  AuthenticatedGuard,
-  CurrentUser,
-} from '@smartcare/common';
+import { AuthenticatedGuard, CurrentUser } from '@smartcare/common';
 import type { IAuthenticatedUser } from '@smartcare/common';
 import { ConfirmOrderDto } from './dto/confirm-order.dto';
 import { AuditLoggingInterceptor } from '../common/prisma-audit-logger.service';

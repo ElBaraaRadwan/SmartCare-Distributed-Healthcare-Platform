@@ -26,8 +26,6 @@ export class PaymentsController {
     private readonly stripeService: StripeService,
   ) {}
 
-
-
   @Post('checkout')
   @UseGuards(AuthenticatedGuard)
   async createCheckout(@Body() createDto: CreateCheckoutDto) {
@@ -55,7 +53,7 @@ export class PaymentsController {
     @Headers('stripe-signature') signature: string,
   ) {
     const rawBody = req.rawBody || Buffer.from('');
-    
+
     const event = await this.stripeService.constructWebhookEvent(
       rawBody,
       signature,

@@ -19,7 +19,8 @@ export class EventConsumerService implements OnModuleInit {
         enableReadyCheck: false,
       });
     } else {
-      const redisHost = this.configService.get<string>('REDIS_HOST') ?? 'localhost';
+      const redisHost =
+        this.configService.get<string>('REDIS_HOST') ?? 'localhost';
       const redisPort = this.configService.get<number>('REDIS_PORT') ?? 6379;
       const redisPassword = this.configService.get<string>('REDIS_PASSWORD');
 
@@ -57,7 +58,9 @@ export class EventConsumerService implements OnModuleInit {
         const { signature, ...eventPayload } = event;
         const eventString = JSON.stringify(eventPayload);
         if (!EventEncryption.verify(eventString, signature)) {
-          this.logger.error(`Invalid HMAC signature for event ${event.eventId}`);
+          this.logger.error(
+            `Invalid HMAC signature for event ${event.eventId}`,
+          );
           return;
         }
 
@@ -65,7 +68,7 @@ export class EventConsumerService implements OnModuleInit {
         const decryptedData = EventEncryption.decrypt(
           event.data.encrypted,
           event.data.iv,
-          event.data.tag
+          event.data.tag,
         );
         event.data = decryptedData;
         await this.handleEvent(event);
@@ -94,9 +97,14 @@ export class EventConsumerService implements OnModuleInit {
     try {
       // Auto-create payment record when order is confirmed
       const payment = await this.paymentsService.createPaymentForOrder(data);
-      this.logger.log(`Payment created: ${payment.id} for order ${data.orderId}`);
+      this.logger.log(
+        `Payment created: ${payment.id} for order ${data.orderId}`,
+      );
     } catch (error) {
-      this.logger.error(`Failed to create payment for order ${data.orderId}:`, error);
+      this.logger.error(
+        `Failed to create payment for order ${data.orderId}:`,
+        error,
+      );
     }
   }
 

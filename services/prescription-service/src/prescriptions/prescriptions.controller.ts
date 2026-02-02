@@ -44,10 +44,17 @@ export class PrescriptionsController {
       },
       fileFilter: (req, file, cb) => {
         // ✅ File type validation
-        const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+        const allowedMimeTypes = [
+          'image/jpeg',
+          'image/png',
+          'image/jpg',
+          'application/pdf',
+        ];
         if (!allowedMimeTypes.includes(file.mimetype)) {
           return cb(
-            new BadRequestException('Invalid file type. Only JPEG, PNG, and PDF allowed'),
+            new BadRequestException(
+              'Invalid file type. Only JPEG, PNG, and PDF allowed',
+            ),
             false,
           );
         }
@@ -56,10 +63,7 @@ export class PrescriptionsController {
         const allowedExtensions = ['.jpg', '.jpeg', '.png', '.pdf'];
         const ext = path.extname(file.originalname).toLowerCase();
         if (!allowedExtensions.includes(ext)) {
-          return cb(
-            new BadRequestException('Invalid file extension'),
-            false,
-          );
+          return cb(new BadRequestException('Invalid file extension'), false);
         }
 
         cb(null, true);

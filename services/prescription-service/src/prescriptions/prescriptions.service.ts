@@ -155,7 +155,7 @@ export class PrescriptionsService {
       where: {
         ...(filters.patientId && { patientId: filters.patientId }),
         ...(filters.doctorId && { doctorId: filters.doctorId }),
-        ...(filters.status && { status: filters.status as any }),
+        ...(filters.status && { status: filters.status }),
       },
       include: {
         medications: true,
