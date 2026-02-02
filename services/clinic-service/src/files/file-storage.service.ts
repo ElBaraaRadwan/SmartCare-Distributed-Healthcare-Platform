@@ -20,13 +20,24 @@ export class FileStorageService {
     });
   }
 
-  async uploadFile(key: string, buffer: Buffer, mimeType: string, metadata?: Record<string, string>) {
+  async uploadFile(
+    key: string,
+    buffer: Buffer,
+    mimeType: string,
+    metadata?: Record<string, string>,
+  ) {
     const metaData = {
       'Content-Type': mimeType,
       ...metadata,
     };
 
-    await this.minioClient.putObject(this.bucketName, key, buffer, buffer.length, metaData);
+    await this.minioClient.putObject(
+      this.bucketName,
+      key,
+      buffer,
+      buffer.length,
+      metaData,
+    );
   }
 
   async downloadFile(key: string) {
@@ -51,7 +62,11 @@ export class FileStorageService {
   }
 
   async createPresignedUrl(key: string, expiresInSeconds: number = 3600) {
-    return await this.minioClient.presignedGetObject(this.bucketName, key, expiresInSeconds);
+    return await this.minioClient.presignedGetObject(
+      this.bucketName,
+      key,
+      expiresInSeconds,
+    );
   }
 
   async listFiles(prefix?: string) {

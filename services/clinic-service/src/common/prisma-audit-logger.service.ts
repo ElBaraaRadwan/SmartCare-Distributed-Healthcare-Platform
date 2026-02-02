@@ -1,4 +1,11 @@
-import { Injectable, NestInterceptor, ExecutionContext, CallHandler, Logger, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  NestInterceptor,
+  ExecutionContext,
+  CallHandler,
+  Logger,
+  Inject,
+} from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { PrismaService } from '../prisma/prisma.service';
@@ -49,7 +56,9 @@ export class PrismaAuditLogger implements AuditLogger {
         )
       `;
 
-      this.logger.debug(`PHI access logged: ${entry.action} ${entry.resource} by ${entry.userEmail || 'unknown'}`);
+      this.logger.debug(
+        `PHI access logged: ${entry.action} ${entry.resource} by ${entry.userEmail || 'unknown'}`,
+      );
     } catch (error) {
       this.logger.error('Failed to save audit log:', error);
       // Don't throw - audit logging should not break the main flow
@@ -113,7 +122,7 @@ export class AuditLoggingInterceptor implements NestInterceptor {
       '/patients',
       '/medical-records',
     ];
-    return phiPatterns.some(pattern => url.includes(pattern));
+    return phiPatterns.some((pattern) => url.includes(pattern));
   }
 
   private sanitize(data: any): any {

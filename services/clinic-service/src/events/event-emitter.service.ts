@@ -27,7 +27,9 @@ export class EventEmitterService {
     const encryptionSecret = this.config.get<string>('EVENT_ENCRYPTION_SECRET');
     const hmacSecret = this.config.get<string>('EVENT_HMAC_SECRET');
     if (!encryptionSecret) {
-      throw new Error('EVENT_ENCRYPTION_SECRET is required for event encryption');
+      throw new Error(
+        'EVENT_ENCRYPTION_SECRET is required for event encryption',
+      );
     }
     EventEncryption.initialize(encryptionSecret, hmacSecret);
 

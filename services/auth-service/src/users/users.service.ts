@@ -12,8 +12,8 @@ export class UsersService {
     const hashedPassword = await argon2.hash(data.password, {
       type: argon2.argon2id,
       memoryCost: 65536, // 64 MB
-      timeCost: 3,        // 3 iterations
-      parallelism: 4,     // 4 parallel threads
+      timeCost: 3, // 3 iterations
+      parallelism: 4, // 4 parallel threads
     });
 
     const user = await this.prisma.user.create({

@@ -12,10 +12,12 @@ import { RedisModule } from './redis/redis.module';
       isGlobal: true,
     }),
     // Rate limiting: 100 requests per minute for auth endpoints (increased for testing)
-    ThrottlerModule.forRoot([{
-      ttl: 60000, // 1 minute
-      limit: 100,  // 100 requests
-    }]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000, // 1 minute
+        limit: 100, // 100 requests
+      },
+    ]),
     RedisModule,
     AuthModule,
     UsersModule,

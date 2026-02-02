@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException, ConflictException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+  Logger,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as argon2 from 'argon2';
@@ -27,7 +32,7 @@ export class AuthService {
       this.securityLogger.logSecurityEvent(SecurityEventType.REGISTRATION, {
         email: registerDto.email,
         outcome: 'FAILED',
-        reason: 'Email already registered'
+        reason: 'Email already registered',
       });
       throw new ConflictException('Email already registered');
     }
@@ -38,7 +43,7 @@ export class AuthService {
       userId: user.id,
       email: user.email,
       role: user.role,
-      outcome: 'SUCCESS'
+      outcome: 'SUCCESS',
     });
 
     return user;
@@ -52,9 +57,11 @@ export class AuthService {
     if (attempts && parseInt(attempts) >= 5) {
       this.securityLogger.logSecurityEvent(SecurityEventType.LOGIN_FAILURE, {
         email: loginDto.email,
-        reason: 'Account locked due to multiple failed attempts'
+        reason: 'Account locked due to multiple failed attempts',
       });
-      throw new UnauthorizedException('Account locked due to multiple failed login attempts. Try again in 15 minutes.');
+      throw new UnauthorizedException(
+        'Account locked due to multiple failed login attempts. Try again in 15 minutes.',
+      );
     }
 
     const user = await this.usersService.findByEmail(loginDto.email);
@@ -80,7 +87,7 @@ export class AuthService {
 
       this.securityLogger.logSecurityEvent(SecurityEventType.LOGIN_FAILURE, {
         email: loginDto.email,
-        reason: 'User not found'
+        reason: 'User not found',
       });
       throw new UnauthorizedException(genericError);
     }
@@ -89,11 +96,13 @@ export class AuthService {
     try {
       isPasswordValid = await argon2.verify(user.password, loginDto.password);
     } catch (error) {
-      this.logger.error(`Password verification error for ${loginDto.email}: ${(error as Error).message}`);
+      this.logger.error(
+        `Password verification error for ${loginDto.email}: ${(error as Error).message}`,
+      );
       this.securityLogger.logSecurityEvent(SecurityEventType.LOGIN_FAILURE, {
         userId: user.id,
         email: loginDto.email,
-        reason: 'Password verification error'
+        reason: 'Password verification error',
       });
 
       // ✅ INCREMENT FAILED ATTEMPTS for password verification error
@@ -111,7 +120,7 @@ export class AuthService {
       this.securityLogger.logSecurityEvent(SecurityEventType.LOGIN_FAILURE, {
         userId: user.id,
         email: loginDto.email,
-        reason: 'Invalid password'
+        reason: 'Invalid password',
       });
       throw new UnauthorizedException(genericError);
     }
@@ -123,11 +132,15 @@ export class AuthService {
     const payload = {
       sub: user.id,
       email: user.email,
-      role: user.role
+      role: user.role,
     };
 
-    const accessTokenTTL = parseInt(this.configService.get('JWT_EXPIRES_IN', '3600'));
-    const refreshTokenTTL = parseInt(this.configService.get('JWT_REFRESH_EXPIRES_IN', '604800'));
+    const accessTokenTTL = parseInt(
+      this.configService.get('JWT_EXPIRES_IN', '3600'),
+    );
+    const refreshTokenTTL = parseInt(
+      this.configService.get('JWT_REFRESH_EXPIRES_IN', '604800'),
+    );
 
     const accessToken = this.jwtService.sign(payload, {
       expiresIn: `${accessTokenTTL}s`,
@@ -139,12 +152,16 @@ export class AuthService {
     });
 
     // Store refresh token in Redis with TTL
-    await this.redisService.set(`refresh_token:${user.id}`, refreshToken, refreshTokenTTL);
+    await this.redisService.set(
+      `refresh_token:${user.id}`,
+      refreshToken,
+      refreshTokenTTL,
+    );
 
     this.securityLogger.logSecurityEvent(SecurityEventType.LOGIN_SUCCESS, {
       userId: user.id,
       email: user.email,
-      role: user.role
+      role: user.role,
     });
 
     return {
@@ -171,7 +188,9 @@ export class AuthService {
       }
 
       // Check if refresh token is stored in Redis
-      const storedToken = await this.redisService.get<string>(`refresh_token:${user.id}`);
+      const storedToken = await this.redisService.get<string>(
+        `refresh_token:${user.id}`,
+      );
       if (!storedToken || storedToken !== refreshToken) {
         throw new UnauthorizedException('Invalid refresh token');
       }
@@ -180,11 +199,15 @@ export class AuthService {
       const newPayload = {
         sub: user.id,
         email: user.email,
-        role: user.role
+        role: user.role,
       };
 
-      const accessTokenTTL = parseInt(this.configService.get('JWT_EXPIRES_IN', '3600'));
-      const refreshTokenTTL = parseInt(this.configService.get('JWT_REFRESH_EXPIRES_IN', '604800'));
+      const accessTokenTTL = parseInt(
+        this.configService.get('JWT_EXPIRES_IN', '3600'),
+      );
+      const refreshTokenTTL = parseInt(
+        this.configService.get('JWT_REFRESH_EXPIRES_IN', '604800'),
+      );
 
       const newAccessToken = this.jwtService.sign(newPayload, {
         expiresIn: `${accessTokenTTL}s`,
@@ -196,7 +219,11 @@ export class AuthService {
       });
 
       // Update refresh token in Redis
-      await this.redisService.set(`refresh_token:${user.id}`, newRefreshToken, refreshTokenTTL);
+      await this.redisService.set(
+        `refresh_token:${user.id}`,
+        newRefreshToken,
+        refreshTokenTTL,
+      );
 
       // Log token refresh
       this.logger.log(`Token refreshed for user ${user.email}`);
@@ -249,14 +276,17 @@ export class AuthService {
       // ✅ Don't reveal if email exists to prevent user enumeration
       this.securityLogger.logSecurityEvent(SecurityEventType.LOGIN_FAILURE, {
         email,
-        reason: 'Password reset requested for non-existent email'
+        reason: 'Password reset requested for non-existent email',
       });
       return { message: 'If email exists, reset link sent' };
     }
 
     // ✅ Generate secure reset token (32 bytes = 256 bits)
     const resetToken = require('crypto').randomBytes(32).toString('hex');
-    const hashedToken = require('crypto').createHash('sha256').update(resetToken).digest('hex');
+    const hashedToken = require('crypto')
+      .createHash('sha256')
+      .update(resetToken)
+      .digest('hex');
 
     // Store hashed token in Redis with 1 hour expiry
     const resetKey = `password_reset:${hashedToken}`;
@@ -269,7 +299,7 @@ export class AuthService {
     this.securityLogger.logSecurityEvent(SecurityEventType.LOGIN_SUCCESS, {
       userId: user.id,
       email,
-      action: 'Password reset requested'
+      action: 'Password reset requested',
     });
 
     return { message: 'If email exists, reset link sent' };
@@ -277,13 +307,16 @@ export class AuthService {
 
   async resetPassword(token: string, newPassword: string) {
     // Hash the provided token to find it in Redis
-    const hashedToken = require('crypto').createHash('sha256').update(token).digest('hex');
+    const hashedToken = require('crypto')
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
     const resetKey = `password_reset:${hashedToken}`;
 
     const userId = await this.redisService.get<string>(resetKey);
     if (!userId) {
       this.securityLogger.logSecurityEvent(SecurityEventType.LOGIN_FAILURE, {
-        reason: 'Invalid or expired password reset token'
+        reason: 'Invalid or expired password reset token',
       });
       throw new UnauthorizedException('Invalid or expired reset token');
     }
@@ -308,7 +341,7 @@ export class AuthService {
 
     this.securityLogger.logSecurityEvent(SecurityEventType.LOGIN_SUCCESS, {
       userId,
-      action: 'Password reset completed'
+      action: 'Password reset completed',
     });
 
     return { message: 'Password reset successful' };

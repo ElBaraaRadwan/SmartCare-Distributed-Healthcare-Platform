@@ -133,7 +133,9 @@ describe('FilesService', () => {
       const mockFileRecord = createMockFile();
 
       jest.spyOn(fileStorageService, 'uploadFile').mockResolvedValue(undefined);
-      jest.spyOn(prismaService.file, 'create').mockResolvedValue(mockFileRecord);
+      jest
+        .spyOn(prismaService.file, 'create')
+        .mockResolvedValue(mockFileRecord);
 
       const result = await service.uploadFile(
         mockFile,
@@ -155,7 +157,7 @@ describe('FilesService', () => {
       const largeFile = { ...mockFile, size: 15 * 1024 * 1024 }; // 15MB
 
       await expect(
-        service.uploadFile(largeFile, mockUser.userId, mockUser.role)
+        service.uploadFile(largeFile, mockUser.userId, mockUser.role),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -163,15 +165,19 @@ describe('FilesService', () => {
       const smallFile = { ...mockFile, size: 512 }; // 512 bytes
 
       await expect(
-        service.uploadFile(smallFile, mockUser.userId, mockUser.role)
+        service.uploadFile(smallFile, mockUser.userId, mockUser.role),
       ).rejects.toThrow(BadRequestException);
     });
 
     it('should reject unsupported file type', async () => {
-      const exeFile = { ...mockFile, mimetype: 'application/x-msdownload', originalname: 'test.exe' };
+      const exeFile = {
+        ...mockFile,
+        mimetype: 'application/x-msdownload',
+        originalname: 'test.exe',
+      };
 
       await expect(
-        service.uploadFile(exeFile, mockUser.userId, mockUser.role)
+        service.uploadFile(exeFile, mockUser.userId, mockUser.role),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -182,17 +188,19 @@ describe('FilesService', () => {
       };
 
       await expect(
-        service.uploadFile(maliciousFile, mockUser.userId, mockUser.role)
+        service.uploadFile(maliciousFile, mockUser.userId, mockUser.role),
       ).rejects.toThrow(BadRequestException);
     });
 
     it('should handle upload failure and cleanup', async () => {
       jest.spyOn(fileStorageService, 'uploadFile').mockResolvedValue(undefined);
-      jest.spyOn(prismaService.file, 'create').mockRejectedValue(new Error('DB Error'));
+      jest
+        .spyOn(prismaService.file, 'create')
+        .mockRejectedValue(new Error('DB Error'));
       jest.spyOn(fileStorageService, 'deleteFile').mockResolvedValue(undefined);
 
       await expect(
-        service.uploadFile(mockFile, mockUser.userId, mockUser.role)
+        service.uploadFile(mockFile, mockUser.userId, mockUser.role),
       ).rejects.toThrow();
 
       expect(fileStorageService.deleteFile).toHaveBeenCalled();
@@ -205,10 +213,18 @@ describe('FilesService', () => {
 
       const mockStream = {} as any;
 
-      jest.spyOn(prismaService.file, 'findUnique').mockResolvedValue(mockFileRecord);
-      jest.spyOn(fileStorageService, 'downloadFile').mockResolvedValue(mockStream);
+      jest
+        .spyOn(prismaService.file, 'findUnique')
+        .mockResolvedValue(mockFileRecord);
+      jest
+        .spyOn(fileStorageService, 'downloadFile')
+        .mockResolvedValue(mockStream);
 
-      const result = await service.getFile('file-123', mockUser.userId, mockUser.role);
+      const result = await service.getFile(
+        'file-123',
+        mockUser.userId,
+        mockUser.role,
+      );
 
       expect(result).toEqual({ file: mockFileRecord, stream: mockStream });
       expect(mockAuditLogger.log).toHaveBeenCalled();
@@ -218,48 +234,66 @@ describe('FilesService', () => {
       jest.spyOn(prismaService.file, 'findUnique').mockResolvedValue(null);
 
       await expect(
-        service.getFile('file-123', mockUser.userId, mockUser.role)
+        service.getFile('file-123', mockUser.userId, mockUser.role),
       ).rejects.toThrow(NotFoundException);
     });
 
     it('should deny access to file uploaded by different user', async () => {
       const mockFileRecord = createMockFile({
         uploadedBy: 'different-user',
-        patientId: null
+        patientId: null,
       });
 
-      jest.spyOn(prismaService.file, 'findUnique').mockResolvedValue(mockFileRecord);
+      jest
+        .spyOn(prismaService.file, 'findUnique')
+        .mockResolvedValue(mockFileRecord);
 
       await expect(
-        service.getFile('file-123', mockUser.userId, mockUser.role)
+        service.getFile('file-123', mockUser.userId, mockUser.role),
       ).rejects.toThrow(BadRequestException);
     });
   });
 
   describe('getFilesByAppointment', () => {
     it('should return files for appointment', async () => {
-      const mockAppointment = createMockAppointment({ patientId: mockUser.userId });
+      const mockAppointment = createMockAppointment({
+        patientId: mockUser.userId,
+      });
 
       const mockFiles = [
         createMockFile({ id: 'file-1' }),
         createMockFile({ id: 'file-2' }),
       ];
 
-      jest.spyOn(prismaService.appointment, 'findUnique').mockResolvedValue(mockAppointment);
+      jest
+        .spyOn(prismaService.appointment, 'findUnique')
+        .mockResolvedValue(mockAppointment);
       jest.spyOn(prismaService.file, 'findMany').mockResolvedValue(mockFiles);
 
-      const result = await service.getFilesByAppointment('appointment-123', mockUser.userId, mockUser.role);
+      const result = await service.getFilesByAppointment(
+        'appointment-123',
+        mockUser.userId,
+        mockUser.role,
+      );
 
       expect(result).toEqual(mockFiles);
     });
 
     it('should deny access to appointment files for unauthorized user', async () => {
-      const mockAppointment = createMockAppointment({ patientId: 'different-patient' });
+      const mockAppointment = createMockAppointment({
+        patientId: 'different-patient',
+      });
 
-      jest.spyOn(prismaService.appointment, 'findUnique').mockResolvedValue(mockAppointment);
+      jest
+        .spyOn(prismaService.appointment, 'findUnique')
+        .mockResolvedValue(mockAppointment);
 
       await expect(
-        service.getFilesByAppointment('appointment-123', mockUser.userId, mockUser.role)
+        service.getFilesByAppointment(
+          'appointment-123',
+          mockUser.userId,
+          mockUser.role,
+        ),
       ).rejects.toThrow(BadRequestException);
     });
   });
@@ -268,10 +302,18 @@ describe('FilesService', () => {
     it('should soft delete file for uploader', async () => {
       const mockFileRecord = createMockFile();
 
-      jest.spyOn(prismaService.file, 'findUnique').mockResolvedValue(mockFileRecord);
-      jest.spyOn(prismaService.file, 'update').mockResolvedValue(createMockFile({ isDeleted: true }));
+      jest
+        .spyOn(prismaService.file, 'findUnique')
+        .mockResolvedValue(mockFileRecord);
+      jest
+        .spyOn(prismaService.file, 'update')
+        .mockResolvedValue(createMockFile({ isDeleted: true }));
 
-      const result = await service.deleteFile('file-123', mockUser.userId, mockUser.role);
+      const result = await service.deleteFile(
+        'file-123',
+        mockUser.userId,
+        mockUser.role,
+      );
 
       expect(result).toEqual({ success: true });
       expect(prismaService.file.update).toHaveBeenCalledWith({
@@ -288,10 +330,12 @@ describe('FilesService', () => {
     it('should deny delete for non-uploader', async () => {
       const mockFileRecord = createMockFile({ uploadedBy: 'different-user' });
 
-      jest.spyOn(prismaService.file, 'findUnique').mockResolvedValue(mockFileRecord);
+      jest
+        .spyOn(prismaService.file, 'findUnique')
+        .mockResolvedValue(mockFileRecord);
 
       await expect(
-        service.deleteFile('file-123', mockUser.userId, mockUser.role)
+        service.deleteFile('file-123', mockUser.userId, mockUser.role),
       ).rejects.toThrow(BadRequestException);
     });
   });

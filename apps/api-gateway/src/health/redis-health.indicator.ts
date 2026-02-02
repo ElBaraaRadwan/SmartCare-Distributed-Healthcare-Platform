@@ -1,5 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { HealthIndicator, HealthIndicatorResult, HealthCheckError } from '@nestjs/terminus';
+import {
+  HealthIndicator,
+  HealthIndicatorResult,
+  HealthCheckError,
+} from '@nestjs/terminus';
 import Redis from 'ioredis';
 
 @Injectable()
@@ -23,7 +27,10 @@ export class RedisHealthIndicator extends HealthIndicator {
       this.redisClient.on('error', (error) => {
         // Only log in development, suppress in production to avoid log spam
         if (process.env.NODE_ENV === 'development') {
-          this.logger.debug('Redis health check connection error:', error.message);
+          this.logger.debug(
+            'Redis health check connection error:',
+            error.message,
+          );
         }
         // Don't throw - health check will handle gracefully
       });

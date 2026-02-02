@@ -36,7 +36,10 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
           redisClient.on('error', (error) => {
             // Silently handle Redis errors - rate limiting will fall back to memory
             if (process.env.NODE_ENV !== 'test') {
-              console.warn('Redis rate limiting error (falling back to memory):', error.message);
+              console.warn(
+                'Redis rate limiting error (falling back to memory):',
+                error.message,
+              );
             }
           });
 
@@ -47,7 +50,10 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
           // Test connection
           await redisClient.ping();
         } catch (error) {
-          console.warn('Redis not available for rate limiting, falling back to memory storage:', error.message);
+          console.warn(
+            'Redis not available for rate limiting, falling back to memory storage:',
+            error.message,
+          );
           redisClient = undefined;
         }
 

@@ -1,5 +1,10 @@
 import { Controller, Get } from '@nestjs/common';
-import { HealthCheckService, HealthCheck, MemoryHealthIndicator, DiskHealthIndicator } from '@nestjs/terminus';
+import {
+  HealthCheckService,
+  HealthCheck,
+  MemoryHealthIndicator,
+  DiskHealthIndicator,
+} from '@nestjs/terminus';
 import { RedisHealthIndicator } from './redis-health.indicator';
 
 @Controller('health')
@@ -19,10 +24,11 @@ export class HealthController {
       () => this.memory.checkHeap('memory_heap', 150 * 1024 * 1024), // 150MB
 
       // ✅ Disk usage check
-      () => this.disk.checkStorage('storage', {
-        path: '/',
-        thresholdPercent: 0.9, // 90% disk usage
-      }),
+      () =>
+        this.disk.checkStorage('storage', {
+          path: '/',
+          thresholdPercent: 0.9, // 90% disk usage
+        }),
 
       // ✅ Redis connectivity check
       () => this.redis.isHealthy('redis'),

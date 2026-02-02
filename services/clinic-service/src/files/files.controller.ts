@@ -26,10 +26,16 @@ export class FilesController {
   @Post('upload')
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
-    @Body() body: { patientId?: string; appointmentId?: string; consultationId?: string; category?: string },
+    @Body()
+    body: {
+      patientId?: string;
+      appointmentId?: string;
+      consultationId?: string;
+      category?: string;
+    },
     @CurrentUser() user: IAuthenticatedUser,
   ) {
-    const category = body.category as any || 'MEDICAL_DOCUMENT';
+    const category = (body.category as any) || 'MEDICAL_DOCUMENT';
 
     return this.filesService.uploadFile(
       file,
@@ -48,10 +54,17 @@ export class FilesController {
     @CurrentUser() user: IAuthenticatedUser,
     @Res() res: Response,
   ) {
-    const { file, stream } = await this.filesService.getFile(id, user.userId, user.role);
+    const { file, stream } = await this.filesService.getFile(
+      id,
+      user.userId,
+      user.role,
+    );
 
     res.setHeader('Content-Type', file.mimeType);
-    res.setHeader('Content-Disposition', `attachment; filename="${file.originalName}"`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${file.originalName}"`,
+    );
     res.setHeader('Content-Length', file.size.toString());
 
     stream.pipe(res);
@@ -62,7 +75,11 @@ export class FilesController {
     @Param('appointmentId') appointmentId: string,
     @CurrentUser() user: IAuthenticatedUser,
   ) {
-    return this.filesService.getFilesByAppointment(appointmentId, user.userId, user.role);
+    return this.filesService.getFilesByAppointment(
+      appointmentId,
+      user.userId,
+      user.role,
+    );
   }
 
   @Delete(':id')

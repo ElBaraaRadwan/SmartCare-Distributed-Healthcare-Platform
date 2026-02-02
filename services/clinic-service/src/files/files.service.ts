@@ -1,4 +1,9 @@
-import { Injectable, BadRequestException, NotFoundException, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  Inject,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { createHash } from 'crypto';
@@ -173,7 +178,11 @@ export class FilesService {
     }
   }
 
-  async getFilesByAppointment(appointmentId: string, userId: string, userRole: string) {
+  async getFilesByAppointment(
+    appointmentId: string,
+    userId: string,
+    userRole: string,
+  ) {
     // Check if user can access appointment
     const appointment = await this.prisma.appointment.findUnique({
       where: { id: appointmentId },
@@ -222,7 +231,7 @@ export class FilesService {
 
     if (!allowedTypes.includes(file.mimetype)) {
       throw new BadRequestException(
-        `File type ${file.mimetype} not allowed. Allowed types: PDF, JPEG, PNG, GIF, DOC, DOCX`
+        `File type ${file.mimetype} not allowed. Allowed types: PDF, JPEG, PNG, GIF, DOC, DOCX`,
       );
     }
 
@@ -241,13 +250,14 @@ export class FilesService {
       'image/png': ['png'],
       'image/gif': ['gif'],
       'application/msword': ['doc'],
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['docx'],
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+        ['docx'],
     };
 
     const allowedExtensions = mimeToExt[file.mimetype] || [];
     if (!extension || !allowedExtensions.includes(extension)) {
       throw new BadRequestException(
-        `File extension ${extension} does not match file type ${file.mimetype}`
+        `File extension ${extension} does not match file type ${file.mimetype}`,
       );
     }
   }
@@ -265,12 +275,16 @@ export class FilesService {
       /eval\(/i,
     ];
 
-    const fileContent = file.buffer.toString('utf8', 0, Math.min(1024, file.size)); // Check first 1KB
+    const fileContent = file.buffer.toString(
+      'utf8',
+      0,
+      Math.min(1024, file.size),
+    ); // Check first 1KB
 
     for (const pattern of dangerousPatterns) {
       if (pattern.test(fileContent)) {
         throw new BadRequestException(
-          'File contains potentially malicious content and has been rejected'
+          'File contains potentially malicious content and has been rejected',
         );
       }
     }
@@ -290,14 +304,16 @@ export class FilesService {
 
     // JPEG validation
     if (file.mimetype === 'image/jpeg') {
-      if (buffer.length < 2 || buffer[0] !== 0xFF || buffer[1] !== 0xD8) {
+      if (buffer.length < 2 || buffer[0] !== 0xff || buffer[1] !== 0xd8) {
         throw new BadRequestException('Invalid JPEG file format');
       }
     }
 
     // PNG validation
     if (file.mimetype === 'image/png') {
-      const pngSignature = Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
+      const pngSignature = Buffer.from([
+        0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+      ]);
       if (buffer.length < 8 || !buffer.subarray(0, 8).equals(pngSignature)) {
         throw new BadRequestException('Invalid PNG file format');
       }
@@ -338,7 +354,11 @@ export class FilesService {
     return false;
   }
 
-  private canAccessAppointment(appointment: any, userId: string, userRole: string): boolean {
+  private canAccessAppointment(
+    appointment: any,
+    userId: string,
+    userRole: string,
+  ): boolean {
     if (userRole === 'ADMIN') return true;
     if (userRole === 'DOCTOR' && appointment.doctorId === userId) return true;
     if (userRole === 'PATIENT' && appointment.patientId === userId) return true;
